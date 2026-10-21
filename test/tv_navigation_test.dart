@@ -58,7 +58,7 @@ void main() {
     await tester.pumpAndSettle();
     final first = focusedText(tester)!;
     final i = state.shows.indexWhere((s) => first.contains(s.name));
-    expect(i, greaterThanOrEqualTo(0), reason: 'down from the play button goes to the shows row');
+    expect(i, 0, reason: 'down from the play button lands on the first show, not the nearest one');
 
     // RTL: the next show is to the left, the previous one to the right.
     await tester.sendKeyEvent(i > 0 ? LogicalKeyboardKey.arrowRight : LogicalKeyboardKey.arrowLeft);

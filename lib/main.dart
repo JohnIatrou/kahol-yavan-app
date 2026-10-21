@@ -103,9 +103,20 @@ class _RadioAppState extends State<RadioApp> {
         locale: const Locale('he'),
         supportedLocales: const [Locale('he')],
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        // The remote's arrows move focus. Web maps them to scrolling by default, which the TV preview build needs to undo.
+        shortcuts: widget.tv ? {...WidgetsApp.defaultShortcuts, ..._remoteKeys} : null,
         home: widget.tv ? const TvHome() : MobileHome(key: _home),
         routes: {'/archive': (_) => const Scaffold(body: ArchiveScreen())},
       ),
     );
   }
 }
+
+const _remoteKeys = <ShortcutActivator, Intent>{
+  SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
+  SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
+  SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
+  SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
+  SingleActivator(LogicalKeyboardKey.select): ActivateIntent(),
+  SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+};

@@ -52,33 +52,84 @@ class _TvFocusableState extends State<TvFocusable> {
 }
 
 /// A titled horizontal row of cards, like every TV app.
-class TvRow extends StatelessWidget {
+/// Coming into the row from above or below lands on the card last used there (the first card at the start),
+/// not on whichever card happens to sit nearest, which in RTL is often one cut off at the screen's edge.
+class TvRow extends StatefulWidget {
   const TvRow({super.key, required this.title, required this.children, this.height = 200});
   final String title;
   final List<Widget> children;
   final double height;
 
   @override
+  State<TvRow> createState() => _TvRowState();
+}
+
+class _TvRowState extends State<TvRow> {
+  final _slots = <int, FocusNode>{};
+  int _last = 0;
+  bool _inside = false;
+
+  @override
+  void dispose() {
+    for (final n in _slots.values) {
+      n.dispose();
+    }
+    super.dispose();
+  }
+
+  FocusNode _slot(int i) => _slots.putIfAbsent(i, () => FocusNode(skipTraversal: true, debugLabel: 'row slot $i'));
+
+  void _entered(int i) {
+    if (_inside) {
+      _last = i;
+      return;
+    }
+    _inside = true;
+    if (i == _last) return;
+    final target = _slots[_last]?.descendants.where((n) => n.canRequestFocus && !n.skipTraversal).firstOrNull;
+    if (target == null || target.context == null) {
+      _last = i;
+      return;
+    }
+    target.requestFocus();
+    Scrollable.ensureVisible(target.context!, alignment: 0.5, duration: const Duration(milliseconds: 200));
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final children = widget.children;
     if (children.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 48),
-          child: Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+          child: Text(widget.title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
         ),
         const SizedBox(height: 10),
         SizedBox(
-          height: height,
-          child: FocusTraversalGroup(
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              clipBehavior: Clip.none,
-              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 8),
-              itemCount: children.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 18),
-              itemBuilder: (_, i) => children[i],
+          height: widget.height,
+          child: Focus(
+            skipTraversal: true,
+            canRequestFocus: false,
+            onFocusChange: (v) {
+              if (!v) _inside = false;
+            },
+            child: FocusTraversalGroup(
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
+                padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 8),
+                itemCount: children.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 18),
+                itemBuilder: (_, i) => Focus(
+                  focusNode: _slot(i),
+                  onFocusChange: (v) {
+                    if (v) _entered(i);
+                  },
+                  child: children[i],
+                ),
+              ),
             ),
           ),
         ),

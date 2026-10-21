@@ -24,10 +24,10 @@ class TvHome extends StatelessWidget {
             builder: (context, _) {
               final s = st.studio;
               return ListView(
-                padding: const EdgeInsets.only(top: 32, bottom: 24),
+                padding: const EdgeInsets.only(top: 24, bottom: 24),
                 children: [
                   const _Hero(),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 20),
                   TvRow(
                     title: 'התכניות בארכיון',
                     height: 240,
@@ -42,7 +42,7 @@ class TvHome extends StatelessWidget {
                     children: s.top.take(5).map((x) => TvSongCard(title: x.title, artist: x.artist, cover: x.cover, badge: '#${x.rank}')).toList(),
                   ),
                   TvRow(title: 'שירים חדשים', height: 200, children: s.fresh.map(_song).toList()),
-                  TvRow(title: 'לוח התכניות', height: 130, children: st.schedule.map((sh) => _ScheduleCard(show: sh)).toList()),
+                  TvRow(title: 'לוח התכניות', height: 130, children: _fromToday(st.schedule).map((sh) => _ScheduleCard(show: sh)).toList()),
                 ],
               );
             },
@@ -51,6 +51,12 @@ class TvHome extends StatelessWidget {
         const TvEpisodeBar(),
       ]),
     );
+  }
+
+  /// The week starting today, so the next shows are the first cards in the row.
+  static List<Show> _fromToday(List<Show> week) {
+    final today = DateTime.now().weekday % 7;
+    return [...week.where((x) => x.day! >= today), ...week.where((x) => x.day! < today)];
   }
 
   static Widget _song(Song x) => TvSongCard(title: x.title, artist: x.artist, cover: x.cover, badge: x.isNew ? 'חדש' : null);
@@ -74,14 +80,14 @@ class _Hero extends StatelessWidget {
     final c = st.config;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 48),
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(colors: [Ly.panel, Ly.night], begin: Alignment.topRight, end: Alignment.bottomLeft),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: Ly.line),
       ),
       child: Row(children: [
-        now?.cover.isNotEmpty == true ? Artwork(url: now!.cover, size: 150, radius: 22, seed: now.title) : const StationLogo(size: 150),
+        now?.cover.isNotEmpty == true ? Artwork(url: now!.cover, size: 112, radius: 20, seed: now.title) : const StationLogo(size: 112),
         const SizedBox(width: 32),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -90,18 +96,18 @@ class _Hero extends StatelessWidget {
               Text(c.name, style: const TextStyle(color: Ly.sky, fontSize: 24, fontWeight: FontWeight.w800)),
               if (s.program.isNotEmpty) Text('•  ${s.program}', style: const TextStyle(color: Ly.muted, fontSize: 18)),
             ]),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             const Text('עכשיו בשידור', style: TextStyle(color: Ly.muted, fontSize: 16)),
             Row(children: [
               Flexible(
                 child: Text(now?.title ?? 'מוזיקה יוונית 24 שעות',
-                    maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, height: 1.1)),
+                    maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900, height: 1.1)),
               ),
               if (now?.isNew == true) const Padding(padding: EdgeInsets.only(right: 12), child: Pill('חדש', size: 16)),
             ]),
             if (now?.artist.isNotEmpty == true)
-              Text(now!.artist, style: const TextStyle(fontSize: 24, color: Color(0xFFC9D2E8))),
-            const SizedBox(height: 14),
+              Text(now!.artist, style: const TextStyle(fontSize: 20, color: Color(0xFFC9D2E8))),
+            const SizedBox(height: 10),
             Wrap(spacing: 10, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
               if (c.hostsImg.isNotEmpty) Artwork(url: c.hostsImg, size: 44, radius: 22),
               Text(c.hostsNames, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
@@ -133,11 +139,11 @@ class _TvLiveButton extends StatelessWidget {
           radius: 60,
           onPressed: () => playing ? audio.pause() : audio.playLive(now: scope.state.studio.now, program: scope.state.studio.program),
           child: Container(
-            width: 104,
-            height: 104,
+            width: 88,
+            height: 88,
             color: Ly.sky,
             alignment: Alignment.center,
-            child: Icon(playing ? Icons.pause_rounded : Icons.play_arrow_rounded, size: 66, color: Ly.night),
+            child: Icon(playing ? Icons.pause_rounded : Icons.play_arrow_rounded, size: 56, color: Ly.night),
           ),
         );
       },
