@@ -154,7 +154,7 @@ class TvSongCard extends StatelessWidget {
         color: Ly.card,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Stack(children: [
-            Artwork(url: cover, size: 130, radius: 0, seed: title),
+            cover.isEmpty ? const StationLogo(size: 130, radius: 0) : Artwork(url: cover, size: 130, radius: 0, seed: title),
             if (badge != null) Positioned(top: 8, right: 8, child: Pill(badge!, size: 11)),
           ]),
           Padding(

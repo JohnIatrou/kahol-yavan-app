@@ -33,8 +33,11 @@ String whatsappUrl(String number, [String text = '']) =>
 
 /// The station logo: drawn, so it is sharp at every size and on TV.
 class StationLogo extends StatelessWidget {
-  const StationLogo({super.key, this.size = 96});
+  const StationLogo({super.key, this.size = 96, this.radius});
   final double size;
+
+  /// Corner radius; rounded to the size by default.
+  final double? radius;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +45,7 @@ class StationLogo extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(size * 0.18),
+        borderRadius: BorderRadius.circular(radius ?? size * 0.18),
         gradient: const LinearGradient(
           colors: [Color(0xFF2B9BF0), Ly.aegean],
           begin: Alignment.topLeft,
@@ -194,7 +197,8 @@ class SongTile extends StatelessWidget {
             width: 28,
             child: Text('${song.rank}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Ly.sky)),
           ),
-        Artwork(url: song.cover, size: 52, seed: song.title),
+        // The site leaves covers out unless they are its own, so most songs show the station's logo.
+        song.cover.isEmpty ? const StationLogo(size: 52, radius: 10) : Artwork(url: song.cover, size: 52, seed: song.title),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
