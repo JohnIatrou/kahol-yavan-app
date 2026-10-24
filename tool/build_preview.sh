@@ -5,6 +5,8 @@
 set -euo pipefail
 out=${1:?preview checkout}
 flutter=${2:-flutter}
+# Each build gets new script URLs, so browsers do not keep showing the previous one from their cache.
+stamp=$(date +%s)
 for v in phone tv; do
   extra=()
   [ "$v" = tv ] && extra=(--dart-define=FORCE_TV=true)
@@ -13,5 +15,7 @@ for v in phone tv; do
     --dart-define=BASE_URL=https://leylotyavan.co.il "${extra[@]}" -o "$out/$v"
   # Only CanvasKit is used; the other renderers and debug symbols are 20 MB nobody downloads.
   rm -rf "$out/$v"/canvaskit/{skwasm*,wimp*,webparagraph,*.symbols} "$out/$v"/canvaskit/chromium/*.symbols
-  sed -i 's|<title>[^<]*</title>|<title>רדיו כחול יוון</title>|' "$out/$v/index.html"
+  sed -i 's|<title>[^<]*</title>|<title>רדיו כחול יוון</title>|; s|flutter_bootstrap.js"|flutter_bootstrap.js?v='"$stamp"'"|' "$out/$v/index.html"
+  sed -i 's|"mainJsPath":"main.dart.js"|"mainJsPath":"main.dart.js?v='"$stamp"'"|' "$out/$v/flutter_bootstrap.js"
+  grep -q "main.dart.js?v=$stamp" "$out/$v/flutter_bootstrap.js"
 done

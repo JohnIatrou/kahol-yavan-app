@@ -339,6 +339,40 @@ class Update {
         image: _s(j['image']),
         link: _s(j['link']),
       );
+
+  /// A post from the site's own REST API (/wp/v2/posts with _embed).
+  factory Update.fromWp(Map<String, dynamic> j) {
+    final media = _list((j['_embedded'] as Map?)?['wp:featuredmedia']);
+    return Update(
+      id: _i(j['id']),
+      title: _plain(_s((j['title'] as Map?)?['rendered'])),
+      date: DateTime.tryParse(_s(j['date'])),
+      excerpt: _plain(_s((j['excerpt'] as Map?)?['rendered'])),
+      image: media.isEmpty ? '' : _s(media.first['source_url']),
+      link: _s(j['link']),
+    );
+  }
+}
+
+class PostPage {
+  final List<Update> posts;
+  final int pages;
+  const PostPage(this.posts, this.pages);
+}
+
+/// Text of a rendered HTML snippet: no tags, entities decoded.
+String _plain(String html) {
+  const named = {'amp': '&', 'quot': '"', 'apos': "'", 'lt': '<', 'gt': '>', 'nbsp': ' ', 'hellip': '…', 'ndash': '–', 'mdash': '—', 'laquo': '«', 'raquo': '»'};
+  return html
+      .replaceAll(RegExp(r'<[^>]*>'), '')
+      .replaceAllMapped(RegExp(r'&(#x?[0-9a-fA-F]+|[a-z]+);'), (m) {
+        final e = m[1]!;
+        if (e.startsWith('#x')) return String.fromCharCode(int.tryParse(e.substring(2), radix: 16) ?? 32);
+        if (e.startsWith('#')) return String.fromCharCode(int.tryParse(e.substring(1)) ?? 32);
+        return named[e] ?? m[0]!;
+      })
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
 }
 
 class ChatReply {
@@ -397,8 +431,27 @@ class Api {
     return EpisodePage(_list(j['episodes']).map(Episode.fromJson).toList(), _i(j['page']), _i(j['pages']));
   }
 
-  Future<List<Update>> updates({int page = 1}) async =>
-      _list((await _get('/lym/v1/app/updates', {'page': '$page'}) as Map)['updates']).map(Update.fromJson).toList();
+  Future<List<Update>> updates({int page = 1}) async => (await updatesPage(page: page)).posts;
+
+  Future<PostPage> updatesPage({int page = 1}) async {
+    final j = await _get('/lym/v1/app/updates', {'page': '$page'}) as Map;
+    return PostPage(_list(j['updates']).map(Update.fromJson).toList(), _i(j['pages']));
+  }
+
+  /// The magazine (category 4). Sites without /lym/v1/app/magazine yet are read through /wp/v2/posts.
+  Future<PostPage> magazine({int page = 1}) async {
+    try {
+      final j = await _get('/lym/v1/app/magazine', {'page': '$page'}) as Map;
+      return PostPage(_list(j['posts'] ?? j['updates']).map(Update.fromJson).toList(), _i(j['pages']));
+    } on ApiError {
+      final r = await _http
+          .get(apiUri('/wp/v2/posts', {'categories': '$kMagazineCat', 'per_page': '20', 'page': '$page', '_embed': 'wp:featuredmedia'}))
+          .timeout(const Duration(seconds: 15));
+      if (r.statusCode != 200) throw ApiError('שגיאה ${r.statusCode}');
+      final posts = _list(jsonDecode(utf8.decode(r.bodyBytes))).map(Update.fromWp).toList();
+      return PostPage(posts, _i(r.headers['x-wp-totalpages']));
+    }
+  }
 
   Future<({int id, String token, String reply})> chatStart(String name, String phone, String subject) async {
     final j = await _post('/lym/v1/chat/start', {'name': name, 'phone': phone, 'subject': subject, 'page': 'app'});

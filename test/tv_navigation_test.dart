@@ -78,15 +78,15 @@ void main() {
     state.dispose();
   });
 
-  testWidgets('Phone: the four tabs open', (tester) async {
+  testWidgets('Phone: every tab opens', (tester) async {
     tester.view.physicalSize = const Size(1080, 2340);
     tester.view.devicePixelRatio = 2.6;
     addTearDown(tester.view.reset);
     final state = await pumpApp(tester, tv: false);
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text(state.studio.now!.title), findsOneWidget);
-    for (final tab in ['ארכיון', 'עדכונים', 'עוד', 'שידור חי']) {
-      await tester.tap(find.text(tab));
+    for (final tab in ['ארכיון', 'מגזין', 'עדכונים', 'עוד', 'שידור חי']) {
+      await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text(tab)));
       await tester.pumpAndSettle(const Duration(milliseconds: 100));
     }
     expect(tester.takeException(), isNull);

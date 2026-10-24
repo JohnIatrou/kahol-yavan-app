@@ -1,10 +1,12 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../api.dart';
 import '../state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/news.dart';
 import 'tv_show_screen.dart';
 import 'tv_widgets.dart';
 
@@ -18,6 +20,7 @@ class TvHome extends StatelessWidget {
     final st = Scope.of(context).state;
     return Scaffold(
       body: Column(children: [
+        const NewsTicker(big: true),
         Expanded(
           child: ListenableBuilder(
             listenable: st,
@@ -32,6 +35,15 @@ class TvHome extends StatelessWidget {
                     title: 'התכניות בארכיון',
                     height: 240,
                     children: st.shows.map((sh) => _ShowCard(show: sh)).toList(),
+                  ),
+                  // Not focusable: the remote moves from the archive straight on to the next row, and the page scrolls past this one.
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(48, 0, 48, 24),
+                    child: Row(children: [
+                      Expanded(child: MagazineSlides()),
+                      SizedBox(width: 20),
+                      _StudioQr(),
+                    ]),
                   ),
                   const _LatestEpisodes(),
                   TvRow(title: 'שודרו לאחרונה', height: 200, children: s.recent.map(_song).toList()),
@@ -87,13 +99,13 @@ class _Hero extends StatelessWidget {
         border: Border.all(color: Ly.line),
       ),
       child: Row(children: [
-        NowCover(song: now, size: 180),
+        NowCover(song: now, size: 200),
         const SizedBox(width: 32),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Wrap(spacing: 14, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
               const LiveBadge(big: true),
-              const StationBadge(width: 76),
+              const StationBadge(width: 96),
               Text(c.name, style: const TextStyle(color: Ly.sky, fontSize: 24, fontWeight: FontWeight.w800)),
               if (s.program.isNotEmpty) Text('•  ${s.program}', style: const TextStyle(color: Ly.muted, fontSize: 18)),
             ]),
@@ -110,6 +122,7 @@ class _Hero extends StatelessWidget {
               Text(now!.artist, style: const TextStyle(fontSize: 20, color: Color(0xFFC9D2E8))),
             if (now?.hebrew.isNotEmpty == true)
               Text('"${now!.hebrew}"', style: const TextStyle(fontSize: 18, color: Ly.sky, fontWeight: FontWeight.w700)),
+            SongProgress(studio: s, big: true),
             const SizedBox(height: 10),
             Wrap(spacing: 10, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
               if (c.hostsImg.isNotEmpty) Artwork(url: c.hostsImg, size: 44, radius: 22),
@@ -123,6 +136,57 @@ class _Hero extends StatelessWidget {
         const _TvLiveButton(),
       ]),
     );
+  }
+}
+
+/// Scan with the phone to write to the studio on WhatsApp: song requests, questions, contact.
+class _StudioQr extends StatelessWidget {
+  const _StudioQr();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Scope.of(context).state.config;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 230),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: Ly.card, borderRadius: BorderRadius.circular(22), border: Border.all(color: Ly.line)),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+          child: QrImageView(
+            data: whatsappUrl(c.whatsapp, 'שלום מהטלוויזיה! אני מאזין/ה לרדיו כחול יוון'),
+            size: 176,
+            padding: EdgeInsets.zero,
+            eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Ly.night),
+            dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Ly.night),
+          ),
+        ),
+        const SizedBox(width: 18),
+        SizedBox(
+          width: 300,
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+            const Row(children: [
+              Icon(Icons.chat, color: Ly.wa, size: 26),
+              SizedBox(width: 8),
+              Flexible(child: Text('דברו עם האולפן', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900))),
+            ]),
+            const SizedBox(height: 8),
+            const Text('סרקו את הברקוד בטלפון ושלחו לנו בוואטסאפ', style: TextStyle(fontSize: 16, color: Color(0xFFC9D2E8), height: 1.3)),
+            const SizedBox(height: 10),
+            const Text('בקשות שירים · פניות · יצירת קשר', style: TextStyle(fontSize: 15, color: Ly.sky, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 8),
+            Text(_phone(c.whatsapp), textDirection: TextDirection.ltr, style: const TextStyle(fontSize: 15, color: Ly.muted)),
+          ]),
+        ),
+      ]),
+    );
+  }
+
+  /// 972529964040 → 052-996-4040
+  static String _phone(String n) {
+    final local = n.startsWith('972') ? '0${n.substring(3)}' : n;
+    return local.length == 10 ? '${local.substring(0, 3)}-${local.substring(3, 6)}-${local.substring(6)}' : local;
   }
 }
 

@@ -107,9 +107,22 @@ class NowCover extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = song;
     if (s == null || s.cover.isEmpty) return StationLogo(size: size);
-    return Stack(clipBehavior: Clip.none, children: [
-      Artwork(url: s.cover, size: size, radius: size * 0.12, seed: s.title),
-      PositionedDirectional(bottom: -size * 0.06, end: -size * 0.06, child: StationBadge(width: size * 0.36)),
+    // As on the site's player: the square station logo inside the cover's bottom corner, with a light frame.
+    final logo = size * 0.27;
+    return Stack(children: [
+      Artwork(url: s.cover, size: size, radius: size * 0.08, seed: s.title),
+      PositionedDirectional(
+        bottom: size * 0.045,
+        end: size * 0.045,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(logo * 0.2),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.85), width: logo * 0.035),
+            boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6)],
+          ),
+          child: StationLogo(size: logo, radius: logo * 0.17),
+        ),
+      ),
     ]);
   }
 }
@@ -267,6 +280,45 @@ class SongTile extends StatelessWidget {
             icon: const Icon(Icons.smart_display, color: Color(0xFFFF5A5F)),
           ),
       ]),
+    );
+  }
+}
+
+/// How far the song on air is: a bar with the minutes played and the song's length.
+class SongProgress extends StatelessWidget {
+  const SongProgress({super.key, required this.studio, this.big = false});
+  final Studio studio;
+  final bool big;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: Stream.periodic(const Duration(seconds: 1)),
+      builder: (context, _) {
+        final p = studio.progress(DateTime.now());
+        if (p == null) return const SizedBox.shrink();
+        final total = Duration(milliseconds: (studio.duration * 1000).round());
+        final style = TextStyle(color: Ly.muted, fontSize: big ? 16 : 12, fontWeight: FontWeight.w700, fontFeatures: const [FontFeature.tabularFigures()]);
+        return Padding(
+          padding: EdgeInsets.only(top: big ? 10 : 12),
+          // Time runs left to right, as on the site's player.
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(children: [
+              Text(fmtDuration(total * p), style: style),
+              SizedBox(width: big ? 12 : 8),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(value: p, minHeight: big ? 6 : 4, backgroundColor: Ly.line, color: Ly.sky),
+                ),
+              ),
+              SizedBox(width: big ? 12 : 8),
+              Text(fmtDuration(total), style: style),
+            ]),
+          ),
+        );
+      },
     );
   }
 }

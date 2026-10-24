@@ -2,7 +2,6 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../api.dart';
 import '../config.dart';
 import '../state.dart';
 import '../theme.dart';
@@ -138,7 +137,7 @@ class LivePlayerCard extends StatelessWidget {
           const SizedBox(width: 12),
           NowCover(song: now, size: 140),
         ]),
-        _SongProgress(studio: s),
+        SongProgress(studio: s),
         const Divider(color: Ly.line, height: 28),
         Row(children: [
           Expanded(
@@ -175,29 +174,6 @@ class LivePlayerCard extends StatelessWidget {
             child: Text('אין חיבור לאתר כרגע. השידור עדיין זמין.', textAlign: TextAlign.center, style: TextStyle(color: Ly.muted, fontSize: 12)),
           ),
       ]),
-    );
-  }
-}
-
-class _SongProgress extends StatelessWidget {
-  const _SongProgress({required this.studio});
-  final Studio studio;
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: Stream.periodic(const Duration(seconds: 1)),
-      builder: (context, _) {
-        final p = studio.progress(DateTime.now());
-        if (p == null) return const SizedBox(height: 8);
-        return Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(value: p, minHeight: 4, backgroundColor: Ly.line, color: Ly.sky),
-          ),
-        );
-      },
     );
   }
 }

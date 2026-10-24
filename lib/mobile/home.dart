@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../config.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/news.dart';
 import 'archive_screen.dart';
 import 'live_screen.dart';
 import 'more_screen.dart';
@@ -41,7 +42,18 @@ class MobileHomeState extends State<MobileHome> {
           ),
         ],
       ),
-      body: IndexedStack(index: _tab, children: const [LiveScreen(), ArchiveScreen(), UpdatesScreen(), MoreScreen()]),
+      body: Column(children: [
+        const NewsTicker(),
+        Expanded(
+          child: IndexedStack(index: _tab, children: [
+            const LiveScreen(),
+            const ArchiveScreen(),
+            PostsScreen.magazine(),
+            PostsScreen.updates(),
+            const MoreScreen(),
+          ]),
+        ),
+      ]),
       bottomNavigationBar: Column(mainAxisSize: MainAxisSize.min, children: [
         const MiniPlayer(),
         NavigationBar(
@@ -50,6 +62,7 @@ class MobileHomeState extends State<MobileHome> {
           destinations: const [
             NavigationDestination(icon: Icon(Icons.sensors), label: 'שידור חי'),
             NavigationDestination(icon: Icon(Icons.library_music_outlined), selectedIcon: Icon(Icons.library_music), label: 'ארכיון'),
+            NavigationDestination(icon: Icon(Icons.auto_stories_outlined), selectedIcon: Icon(Icons.auto_stories), label: 'מגזין'),
             NavigationDestination(icon: Icon(Icons.newspaper_outlined), selectedIcon: Icon(Icons.newspaper), label: 'עדכונים'),
             NavigationDestination(icon: Icon(Icons.more_horiz), label: 'עוד'),
           ],

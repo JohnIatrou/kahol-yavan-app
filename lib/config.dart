@@ -25,3 +25,6 @@ const kLogoUrl = 'https://yaniv.tv/player/livegreece/KaholYavanPlayer.webp';
 
 /// The wide "כחול יוון" logo from the site's header, used as a badge on song covers.
 const kBadgeUrl = 'https://leylotyavan.co.il/uploads/kachol-yavan.png';
+
+/// The site's magazine category ("מגזין", as on the new homepage).
+const kMagazineCat = 4;
