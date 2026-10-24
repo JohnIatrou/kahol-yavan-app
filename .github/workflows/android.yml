@@ -17,11 +17,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Google Play needs a higher version code on every upload; the old app is at 17.
-      BUILD_NUMBER: ${{ 100 + github.run_number }}
       HAS_PLAY: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
     steps:
       - uses: actions/checkout@v4
+
+      # Google Play needs a higher version code on every upload; the old app is at 17.
+      - run: echo "BUILD_NUMBER=$((100 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
 
       - uses: actions/setup-java@v4
         with:
