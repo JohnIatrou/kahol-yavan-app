@@ -213,7 +213,9 @@ class Studio {
   /// 0..1 of the song on air, or null when the length is unknown.
   double? progress(DateTime at) {
     if (started <= 0 || duration <= 0) return null;
-    final p = (at.millisecondsSinceEpoch / 1000 - started) / duration;
+    // The studio reports the start in milliseconds; older feeds sent seconds.
+    final start = started > 100000000000 ? started / 1000 : started.toDouble();
+    final p = (at.millisecondsSinceEpoch / 1000 - start) / duration;
     return p.clamp(0.0, 1.0);
   }
 }
