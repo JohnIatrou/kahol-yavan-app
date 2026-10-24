@@ -136,10 +136,7 @@ class LivePlayerCard extends StatelessWidget {
             ]),
           ),
           const SizedBox(width: 12),
-          Stack(clipBehavior: Clip.none, children: [
-            now?.cover.isNotEmpty == true ? Artwork(url: now!.cover, size: 112, radius: 18, seed: now.title) : const StationLogo(size: 112),
-            if (now?.cover.isNotEmpty == true) const Positioned(bottom: -8, left: -8, child: StationLogo(size: 38)),
-          ]),
+          NowCover(song: now, size: 140),
         ]),
         _SongProgress(studio: s),
         const Divider(color: Ly.line, height: 28),

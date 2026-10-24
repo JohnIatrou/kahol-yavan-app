@@ -73,6 +73,47 @@ class StationLogo extends StatelessWidget {
 }
 
 
+/// The wide station logo from the site's header, on the station's blue.
+class StationBadge extends StatelessWidget {
+  const StationBadge({super.key, this.width = 56});
+  final double width;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: width,
+        padding: EdgeInsets.all(width * 0.08),
+        decoration: BoxDecoration(
+          color: Ly.aegean,
+          borderRadius: BorderRadius.circular(width * 0.16),
+          boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 8)],
+        ),
+        child: Image.network(
+          kBadgeUrl,
+          fit: BoxFit.contain,
+          webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+          errorBuilder: (_, _, _) => Icon(Icons.radio, color: Colors.white, size: width * 0.5),
+        ),
+      );
+}
+
+/// The song on air: its cover with the station badge in the corner, as on the site's player,
+/// or the station logo when the song has no cover.
+class NowCover extends StatelessWidget {
+  const NowCover({super.key, required this.song, this.size = 150});
+  final Song? song;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = song;
+    if (s == null || s.cover.isEmpty) return StationLogo(size: size);
+    return Stack(clipBehavior: Clip.none, children: [
+      Artwork(url: s.cover, size: size, radius: size * 0.12, seed: s.title),
+      PositionedDirectional(bottom: -size * 0.06, end: -size * 0.06, child: StationBadge(width: size * 0.36)),
+    ]);
+  }
+}
+
 /// A cover or photo from the site, or a coloured tile when there is none.
 class Artwork extends StatelessWidget {
   const Artwork({super.key, required this.url, this.size = 56, this.height, this.radius = 10, this.seed = ''});

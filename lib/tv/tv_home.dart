@@ -87,12 +87,13 @@ class _Hero extends StatelessWidget {
         border: Border.all(color: Ly.line),
       ),
       child: Row(children: [
-        now?.cover.isNotEmpty == true ? Artwork(url: now!.cover, size: 112, radius: 20, seed: now.title) : const StationLogo(size: 112),
+        NowCover(song: now, size: 180),
         const SizedBox(width: 32),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Wrap(spacing: 14, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
               const LiveBadge(big: true),
+              const StationBadge(width: 76),
               Text(c.name, style: const TextStyle(color: Ly.sky, fontSize: 24, fontWeight: FontWeight.w800)),
               if (s.program.isNotEmpty) Text('•  ${s.program}', style: const TextStyle(color: Ly.muted, fontSize: 18)),
             ]),

@@ -22,3 +22,6 @@ const kAppStoreUrl = 'https://apps.apple.com/app/id1585558940';
 
 /// The station's logo, as the site's player shows it.
 const kLogoUrl = 'https://yaniv.tv/player/livegreece/KaholYavanPlayer.webp';
+
+/// The wide "כחול יוון" logo from the site's header, used as a badge on song covers.
+const kBadgeUrl = 'https://leylotyavan.co.il/uploads/kachol-yavan.png';
