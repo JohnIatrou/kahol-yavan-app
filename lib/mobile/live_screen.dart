@@ -114,6 +114,25 @@ class LivePlayerCard extends StatelessWidget {
               if (now?.isNew == true) const Padding(padding: EdgeInsets.only(top: 4), child: Pill('חדש')),
               if (now?.artist.isNotEmpty == true)
                 Padding(padding: const EdgeInsets.only(top: 4), child: Text(now!.artist, style: const TextStyle(color: Color(0xFFC9D2E8), fontSize: 15))),
+              if (now?.hebrew.isNotEmpty == true)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text('"${now!.hebrew}"', style: const TextStyle(color: Ly.sky, fontSize: 15, fontWeight: FontWeight.w700)),
+                ),
+              if (now?.youtube.isNotEmpty == true)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: OutlinedButton.icon(
+                    onPressed: () => openUrl(now!.youtube),
+                    icon: const Icon(Icons.smart_display, color: Color(0xFFFF4E45), size: 20),
+                    label: const Text('לשיר ביוטיוב'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Ly.line),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                ),
             ]),
           ),
           const SizedBox(width: 12),

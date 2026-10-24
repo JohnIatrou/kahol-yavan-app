@@ -107,6 +107,9 @@ class Song {
   final String artist;
   final String cover;
   final String youtube;
+
+  /// The song's name in Hebrew, when the studio has one ("cc" in the feed).
+  final String hebrew;
   final bool isNew;
   final int count;
   final int rank;
@@ -116,6 +119,7 @@ class Song {
     required this.artist,
     this.cover = '',
     this.youtube = '',
+    this.hebrew = '',
     this.isNew = false,
     this.count = 0,
     this.rank = 0,
@@ -126,6 +130,7 @@ class Song {
         artist: _s(j['artist']),
         cover: _s(j['cover']),
         youtube: _s(j['youtube']),
+        hebrew: j['cc'] is Map ? _s(j['cc']['text']) : '',
         isNew: j['isNew'] == true,
         count: _i(j['count']),
         rank: _i(j['rank']),

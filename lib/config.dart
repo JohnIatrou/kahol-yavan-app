@@ -19,3 +19,6 @@ Uri apiUri(String route, [Map<String, String> query = const {}]) {
 
 const kPlayStoreUrl = 'https://play.google.com/store/apps/details?id=com.chagil.kahol_yavan_radio_app';
 const kAppStoreUrl = 'https://apps.apple.com/app/id1585558940';
+
+/// The station's logo, as the site's player shows it.
+const kLogoUrl = 'https://yaniv.tv/player/livegreece/KaholYavanPlayer.webp';

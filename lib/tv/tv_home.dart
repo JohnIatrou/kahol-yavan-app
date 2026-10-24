@@ -107,6 +107,8 @@ class _Hero extends StatelessWidget {
             ]),
             if (now?.artist.isNotEmpty == true)
               Text(now!.artist, style: const TextStyle(fontSize: 20, color: Color(0xFFC9D2E8))),
+            if (now?.hebrew.isNotEmpty == true)
+              Text('"${now!.hebrew}"', style: const TextStyle(fontSize: 18, color: Ly.sky, fontWeight: FontWeight.w700)),
             const SizedBox(height: 10),
             Wrap(spacing: 10, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
               if (c.hostsImg.isNotEmpty) Artwork(url: c.hostsImg, size: 44, radius: 22),

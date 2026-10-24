@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
 import '../audio.dart';
+import '../config.dart';
 import '../push.dart';
 import '../state.dart';
 import '../theme.dart';
@@ -31,7 +33,7 @@ Future<void> openUrl(String url) async {
 String whatsappUrl(String number, [String text = '']) =>
     'https://wa.me/$number${text.isEmpty ? '' : '?text=${Uri.encodeComponent(text)}'}';
 
-/// The station logo: drawn, so it is sharp at every size and on TV.
+/// The station logo, the same picture as the site's player.
 class StationLogo extends StatelessWidget {
   const StationLogo({super.key, this.size = 96, this.radius});
   final double size;
@@ -41,32 +43,35 @@ class StationLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius ?? size * 0.18),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF2B9BF0), Ly.aegean],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [BoxShadow(color: Ly.sky.withValues(alpha: 0.25), blurRadius: size * 0.2)],
-      ),
-      alignment: Alignment.center,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.radio, color: Colors.white, size: size * 0.32),
-          Text(
-            'כחול יוון',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: size * 0.17, height: 1.1),
-          ),
-        ],
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius ?? size * 0.18),
+      child: Image.network(
+        kLogoUrl,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+        errorBuilder: (_, _, _) => _drawn(),
+        frameBuilder: (_, child, frame, sync) => frame == null && !sync ? _drawn() : child,
       ),
     );
   }
+
+  /// Shown while the logo loads, or without a connection.
+  Widget _drawn() => Container(
+        width: size,
+        height: size,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(colors: [Color(0xFF2B9BF0), Ly.aegean], begin: Alignment.topLeft, end: Alignment.bottomRight),
+        ),
+        alignment: Alignment.center,
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.radio, color: Colors.white, size: size * 0.32),
+          Text('כחול יוון', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: size * 0.17, height: 1.1)),
+        ]),
+      );
 }
+
 
 /// A cover or photo from the site, or a coloured tile when there is none.
 class Artwork extends StatelessWidget {
@@ -103,7 +108,10 @@ class Artwork extends StatelessWidget {
         height: height ?? size,
         child: url.isEmpty
             ? fallback
-            : CachedNetworkImage(imageUrl: url, fit: BoxFit.cover, errorWidget: (_, _, _) => fallback, placeholder: (_, _) => fallback),
+            : kIsWeb
+                // In a browser, pictures from other sites show as plain <img> elements, which need no CORS.
+                ? Image.network(url, fit: BoxFit.cover, webHtmlElementStrategy: WebHtmlElementStrategy.fallback, errorBuilder: (_, _, _) => fallback)
+                : CachedNetworkImage(imageUrl: url, fit: BoxFit.cover, errorWidget: (_, _, _) => fallback, placeholder: (_, _) => fallback),
       ),
     );
   }
