@@ -105,6 +105,13 @@ class _RadioAppState extends State<RadioApp> {
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         // The remote's arrows move focus. Web maps them to scrolling by default, which the TV preview build needs to undo.
         shortcuts: widget.tv ? {...WidgetsApp.defaultShortcuts, ..._remoteKeys} : null,
+        // Escape stands in for the remote's Back button when the TV app runs in a browser.
+        builder: widget.tv
+            ? (context, child) => CallbackShortcuts(
+                  bindings: {const SingleActivator(LogicalKeyboardKey.escape): () => _nav.currentState?.maybePop()},
+                  child: child!,
+                )
+            : null,
         home: widget.tv ? const TvHome() : MobileHome(key: _home),
         routes: {'/archive': (_) => const Scaffold(body: ArchiveScreen())},
       ),
