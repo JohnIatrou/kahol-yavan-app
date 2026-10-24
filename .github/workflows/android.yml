@@ -3,7 +3,8 @@
 #
 # Secrets (Settings → Secrets and variables → Actions):
 #   ANDROID_KEYSTORE_BASE64    upload key (.jks) in base64
-#   ANDROID_KEYSTORE_PASSWORD  ANDROID_KEY_ALIAS  ANDROID_KEY_PASSWORD
+#   ANDROID_KEYSTORE_PASSWORD  its password
+#   ANDROID_KEY_ALIAS  ANDROID_KEY_PASSWORD  optional: default to "upload" and the keystore password
 #   GOOGLE_SERVICES_JSON       Firebase android/app/google-services.json (optional: without it, no notifications)
 #   PLAY_SERVICE_ACCOUNT_JSON  Google Play API service account (optional: without it, download the .aab from the run)
 name: Android
@@ -57,8 +58,8 @@ jobs:
       - name: Build
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS || 'upload' }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD || secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           flutter build appbundle --release --build-number=$BUILD_NUMBER --dart-define=BUILD_NUMBER=$BUILD_NUMBER
           flutter build apk --release --build-number=$BUILD_NUMBER --dart-define=BUILD_NUMBER=$BUILD_NUMBER
