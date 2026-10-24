@@ -107,23 +107,41 @@ class NowCover extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = song;
     if (s == null || s.cover.isEmpty) return StationLogo(size: size);
-    // As on the site's player: the square station logo inside the cover's bottom corner, with a light frame.
+    // As on the site's player: the square station logo tight in the cover's bottom corner.
     final logo = size * 0.27;
-    return Stack(children: [
-      Artwork(url: s.cover, size: size, radius: size * 0.08, seed: s.title),
-      PositionedDirectional(
-        bottom: size * 0.045,
-        end: size * 0.045,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(logo * 0.2),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.85), width: logo * 0.035),
-            boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6)],
-          ),
-          child: StationLogo(size: logo, radius: logo * 0.17),
+    final r = size * 0.08;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(r),
+      child: Stack(children: [
+        Artwork(url: s.cover, size: size, radius: 0, seed: s.title),
+        PositionedDirectional(
+          bottom: 0,
+          end: 0,
+          child: CornerBadge(child: StationLogo(size: logo, radius: 0)),
         ),
+      ]),
+    );
+  }
+}
+
+/// A small logo tight in a picture's bottom corner (the end side), framed on its inner edges.
+class CornerBadge extends StatelessWidget {
+  const CornerBadge({super.key, required this.child, this.radius = 10});
+  final Widget child;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final inner = BorderRadiusDirectional.only(topStart: Radius.circular(radius));
+    return Container(
+      padding: const EdgeInsetsDirectional.only(top: 2, start: 2),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.9),
+        borderRadius: inner,
+        boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6)],
       ),
-    ]);
+      child: ClipRRect(borderRadius: BorderRadiusDirectional.only(topStart: Radius.circular(radius - 2)), child: child),
+    );
   }
 }
 

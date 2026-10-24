@@ -156,7 +156,7 @@ class _StudioQr extends StatelessWidget {
           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
           child: QrImageView(
             data: whatsappUrl(c.whatsapp, 'שלום מהטלוויזיה! אני מאזין/ה לרדיו כחול יוון'),
-            size: 176,
+            size: 150,
             padding: EdgeInsets.zero,
             eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Ly.night),
             dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Ly.night),
@@ -164,12 +164,12 @@ class _StudioQr extends StatelessWidget {
         ),
         const SizedBox(width: 18),
         SizedBox(
-          width: 300,
+          width: 230,
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
             const Row(children: [
               Icon(Icons.chat, color: Ly.wa, size: 26),
               SizedBox(width: 8),
-              Flexible(child: Text('דברו עם האולפן', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900))),
+              Flexible(child: Text('דברו עם האולפן', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900))),
             ]),
             const SizedBox(height: 8),
             const Text('סרקו את הברקוד בטלפון ושלחו לנו בוואטסאפ', style: TextStyle(fontSize: 16, color: Color(0xFFC9D2E8), height: 1.3)),

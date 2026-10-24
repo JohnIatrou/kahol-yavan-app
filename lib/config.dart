@@ -28,3 +28,6 @@ const kBadgeUrl = 'https://leylotyavan.co.il/uploads/kachol-yavan.png';
 
 /// The site's magazine category ("מגזין", as on the new homepage).
 const kMagazineCat = 4;
+
+/// The Leylot Yavan site logo, on the magazine slides.
+const kSiteLogoUrl = 'https://leylotyavan.co.il/uploads/leylot-yavan-logo.png';

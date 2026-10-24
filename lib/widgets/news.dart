@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../api.dart';
+import '../config.dart';
 import '../state.dart';
 import '../theme.dart';
 import 'common.dart';
@@ -78,7 +79,7 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
   @override
   Widget build(BuildContext context) {
     final big = widget.big;
-    final fs = big ? 20.0 : 13.0;
+    final fs = big ? 15.0 : 13.0;
     final p = posts.isEmpty ? null : posts[_i % posts.length];
     String two(int n) => n.toString().padLeft(2, '0');
     final clock = 'יום ${kDayNames[_now.weekday % 7]} ${two(_now.day)}.${two(_now.month)}.${_now.year} · ${two(_now.hour)}:${two(_now.minute)}';
@@ -87,12 +88,12 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
       child: InkWell(
         onTap: p == null || big ? null : () => openUrl(p.link),
         child: Container(
-          height: big ? 54 : 38,
+          height: big ? 40 : 38,
           padding: EdgeInsets.symmetric(horizontal: big ? 48 : 12),
           decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Ly.line))),
           child: Row(children: [
             Container(
-              padding: EdgeInsets.symmetric(horizontal: big ? 14 : 9, vertical: big ? 5 : 3),
+              padding: EdgeInsets.symmetric(horizontal: big ? 11 : 9, vertical: 3),
               decoration: BoxDecoration(color: Ly.live, borderRadius: BorderRadius.circular(6)),
               child: Text('עדכונים', style: TextStyle(fontSize: fs, fontWeight: FontWeight.w800, color: Colors.white)),
             ),
@@ -171,39 +172,55 @@ class _MagazineSlidesState extends State<MagazineSlides> with _Feed {
       height: h,
       decoration: BoxDecoration(color: Ly.card, borderRadius: BorderRadius.circular(22), border: Border.all(color: Ly.line)),
       clipBehavior: Clip.antiAlias,
-      child: p == null
-          ? const Center(child: Text('מהמגזין של לילות יוון', style: TextStyle(color: Ly.muted, fontSize: 20)))
-          : AnimatedSwitcher(
-              duration: const Duration(milliseconds: 700),
-              child: Row(key: ValueKey(p.id), children: [
-                SizedBox(
-                  width: h * 16 / 10,
-                  height: h,
-                  child: p.image.isEmpty ? const Center(child: StationLogo(size: 120)) : Artwork(url: p.image, size: h * 16 / 10, height: h, radius: 0),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 700),
+        child: p == null
+            ? const Center(key: ValueKey(0), child: Text('מהמגזין של לילות יוון', style: TextStyle(color: Ly.muted, fontSize: 20)))
+            // The picture fills the card and the headline sits on it, so the slide reads at any width.
+            : Stack(key: ValueKey(p.id), fit: StackFit.expand, children: [
+                LayoutBuilder(builder: (c, b) => Artwork(url: p.image, size: b.maxWidth, height: b.maxHeight, radius: 0, seed: p.title)),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [0.15, 0.95],
+                      colors: [Color(0x00000000), Color(0xEE08122B)],
+                    ),
+                  ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 18, 24, 16),
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Row(children: [
-                        const Pill('מהמגזין', size: 14, color: Ly.sky, fg: Ly.night),
-                        const SizedBox(width: 10),
-                        Text(fmtDate(p.date), style: const TextStyle(color: Ly.muted, fontSize: 15)),
-                        const Spacer(),
-                        Text('${_i % posts.length + 1}/${posts.length}', style: const TextStyle(color: Ly.muted, fontSize: 15)),
-                      ]),
-                      const SizedBox(height: 10),
-                      Expanded(
-                        child: Text(p.title,
-                            maxLines: 3, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, height: 1.2)),
-                      ),
-                      const Text('לקריאת הידיעה וכתבות נוספות היכנסו לאפליקציית לילות יוון',
-                          style: TextStyle(color: Ly.fresh, fontSize: 16, fontWeight: FontWeight.w700)),
-                    ]),
+                PositionedDirectional(
+                  top: 14,
+                  start: 16,
+                  child: Row(children: [
+                    const Pill('מהמגזין', size: 14, color: Ly.sky, fg: Ly.night),
+                    const SizedBox(width: 10),
+                    Text(fmtDate(p.date), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, shadows: [Shadow(blurRadius: 6)])),
+                  ]),
+                ),
+                PositionedDirectional(
+                  start: 18,
+                  end: 150,
+                  bottom: 14,
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                    Text(p.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, height: 1.2)),
+                    const SizedBox(height: 6),
+                    const Text('לידיעות המלאות ולכתבות נוספות היכנסו לאתר לילות יוון',
+                        maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Ly.fresh, fontSize: 15, fontWeight: FontWeight.w700)),
+                  ]),
+                ),
+                // The site's logo tight in the corner, as the station logo on the song cover.
+                PositionedDirectional(
+                  bottom: 0,
+                  end: 0,
+                  child: CornerBadge(
+                    radius: 14,
+                    child: Image.network(kSiteLogoUrl, width: 128, height: 66, fit: BoxFit.cover, webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+                        errorBuilder: (_, _, _) => const SizedBox(width: 128, height: 66)),
                   ),
                 ),
               ]),
-            ),
+      ),
     );
   }
 }
