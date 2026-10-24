@@ -19,3 +19,5 @@ for v in phone tv; do
   sed -i 's|"mainJsPath":"main.dart.js"|"mainJsPath":"main.dart.js?v='"$stamp"'"|' "$out/$v/flutter_bootstrap.js"
   grep -q "main.dart.js?v=$stamp" "$out/$v/flutter_bootstrap.js"
 done
+# The frame page points at this build too, so a refresh always shows it.
+sed -i -E 's#src="(phone|tv)/[^"]*"#src="\1/?v='"$stamp"'"#' "$out/index.html"
