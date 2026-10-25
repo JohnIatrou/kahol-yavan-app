@@ -97,7 +97,8 @@ class _Hero extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: Ly.line),
       ),
-      child: Row(children: [
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Row(children: [
         NowCover(song: now, size: 170),
         const SizedBox(width: 24),
         Expanded(
@@ -122,13 +123,6 @@ class _Hero extends StatelessWidget {
             if (now?.hebrew.isNotEmpty == true)
               Text('"${now!.hebrew}"', style: const TextStyle(fontSize: 18, color: Ly.sky, fontWeight: FontWeight.w700)),
             SongProgress(studio: s, big: true),
-            const SizedBox(height: 10),
-            Wrap(spacing: 10, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
-              if (c.hostsImg.isNotEmpty) Artwork(url: c.hostsImg, size: 44, radius: 22),
-              Text(c.hostsNames, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-              Pill(c.hostsWhen, size: 13),
-              if (s.nextName.isNotEmpty) Pill('התכנית הבאה: ${s.nextName} · ${s.nextStart}', size: 13, color: Ly.cream),
-            ]),
           ]),
         ),
         if (s.recent.isNotEmpty) ...[
@@ -137,6 +131,30 @@ class _Hero extends StatelessWidget {
         ],
         const SizedBox(width: 24),
         const _TvLiveButton(),
+        ]),
+        // The hosts and the next show across the whole player, under the recent songs too.
+        Container(
+          margin: const EdgeInsets.only(top: 14),
+          padding: const EdgeInsets.only(top: 12),
+          decoration: const BoxDecoration(border: Border(top: BorderSide(color: Ly.line))),
+          child: Row(children: [
+            Expanded(
+              child: Wrap(spacing: 10, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                if (c.hostsImg.isNotEmpty) Artwork(url: c.hostsImg, size: 40, radius: 20),
+                Text(c.hostsNames, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                Pill(c.hostsWhen, size: 13),
+              ]),
+            ),
+            if (s.nextName.isNotEmpty)
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Pill('התכנית הבאה: ${s.nextName} · ${s.nextStart}', size: 13, color: Ly.cream),
+                ),
+              ),
+          ]),
+        ),
       ]),
     );
   }
