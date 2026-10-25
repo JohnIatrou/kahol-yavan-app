@@ -37,11 +37,19 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <!-- Android TV / Google TV / Fire TV list the app under its TV name, "כחול יוון פלוס". -->
+        <activity-alias
+            android:name=".TvLauncher"
+            android:targetActivity=".MainActivity"
+            android:label="כחול יוון פלוס"
+            android:banner="@drawable/tv_banner"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
             </intent-filter>
-        </activity>
+        </activity-alias>
 
         <!-- audio_service: plays with the screen off, lock-screen / notification / remote controls. -->
         <service
