@@ -47,6 +47,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   qr_flutter: ^4.1.0
+  lottie: ^3.6.1
 
 dev_dependencies:
   flutter_test:
@@ -81,6 +82,10 @@ flutter:
           weight: 700
         - asset: assets/fonts/Assistant-800.ttf
           weight: 800
+
+  # Animated weather icons: Meteocons by Bas Milius (MIT, assets/weather/LICENSE-meteocons.txt).
+  assets:
+    - assets/weather/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

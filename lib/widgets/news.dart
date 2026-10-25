@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 import '../api.dart';
 import '../config.dart';
@@ -136,7 +137,7 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
             : Row(key: ValueKey(w.city), mainAxisSize: MainAxisSize.min, children: [
                 Text(w.city, style: TextStyle(fontSize: fs, fontWeight: FontWeight.w700)),
                 SizedBox(width: big ? 8 : 6),
-                WeatherIcon(code: w.code, day: w.day, size: fs + 9),
+                WeatherIcon(code: w.code, day: w.day, size: fs * 2.2),
                 SizedBox(width: big ? 6 : 4),
                 Text('\u200E${w.temp}°',
                     style: TextStyle(fontSize: fs, color: Ly.sky, fontWeight: FontWeight.w800, fontFeatures: const [FontFeature.tabularFigures()])),
@@ -155,7 +156,7 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
               ? SizedBox(height: 40, child: Row(children: [label, const SizedBox(width: 16), news, const SizedBox(width: 16), ...info]))
               : Column(mainAxisSize: MainAxisSize.min, children: [
                   SizedBox(height: 34, child: Row(children: [label, const SizedBox(width: 10), news])),
-                  SizedBox(height: 28, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: info)),
+                  SizedBox(height: 30, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: info)),
                 ]),
         ),
       ),
@@ -168,27 +169,27 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
       );
 }
 
-/// A coloured icon for a WMO weather code.
+/// An animated weather icon (Meteocons) for a WMO weather code.
 class WeatherIcon extends StatelessWidget {
   const WeatherIcon({super.key, required this.code, this.day = true, this.size = 18});
   final int code;
   final bool day;
   final double size;
 
+  String get _name => switch (code) {
+        0 => day ? 'clear-day' : 'clear-night',
+        1 || 2 => day ? 'partly-cloudy-day' : 'partly-cloudy-night',
+        3 => 'overcast',
+        45 || 48 => 'fog',
+        >= 95 => 'thunderstorms',
+        >= 71 && <= 77 || 85 || 86 => 'snow',
+        >= 51 && <= 57 => 'drizzle',
+        >= 61 && <= 67 || >= 80 && <= 82 => 'rain',
+        _ => 'overcast',
+      };
+
   @override
-  Widget build(BuildContext context) {
-    final (icon, color) = switch (code) {
-      0 => day ? (Icons.wb_sunny, Ly.fresh) : (Icons.nightlight_round, const Color(0xFFDDE3EC)),
-      1 || 2 => day ? (Icons.wb_cloudy, Ly.fresh) : (Icons.nights_stay, const Color(0xFFDDE3EC)),
-      3 => (Icons.cloud, const Color(0xFFC9D2E8)),
-      45 || 48 => (Icons.foggy, const Color(0xFFC9D2E8)),
-      >= 95 => (Icons.thunderstorm, const Color(0xFFFFD166)),
-      >= 71 && <= 77 || 85 || 86 => (Icons.ac_unit, Colors.white),
-      >= 51 && <= 67 || >= 80 && <= 82 => (Icons.water_drop, Ly.sky),
-      _ => (Icons.wb_cloudy, const Color(0xFFC9D2E8)),
-    };
-    return Icon(icon, size: size, color: color);
-  }
+  Widget build(BuildContext context) => Lottie.asset('assets/weather/$_name.json', width: size, height: size, fit: BoxFit.contain);
 }
 
 /// "DD.MM • HH:MM | title", as on the site. The site's titles usually carry it already.
