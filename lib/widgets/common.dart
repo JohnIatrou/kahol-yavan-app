@@ -107,20 +107,32 @@ class NowCover extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = song;
     if (s == null || s.cover.isEmpty) return StationLogo(size: size);
-    // As on the site's player: the square station logo tight in the cover's bottom corner.
-    final logo = size * 0.27;
-    final r = size * 0.08;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(r),
-      child: Stack(children: [
-        Artwork(url: s.cover, size: size, radius: 0, seed: s.title),
-        PositionedDirectional(
-          bottom: 0,
-          end: 0,
-          child: CornerBadge(child: StationLogo(size: logo, radius: 0)),
+    // Exactly as .nh-rb__art on the site's new design, scaled from its 140px cover: a 16px-rounded cover with
+    // a soft shadow, and a 44px station logo in a 3px night-blue frame, 8px out past the bottom-left corner.
+    final k = size / 140;
+    return Stack(clipBehavior: Clip.none, children: [
+      Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16 * k),
+          boxShadow: [BoxShadow(color: const Color(0x59000000), offset: Offset(0, 10 * k), blurRadius: 26 * k)],
         ),
-      ]),
-    );
+        child: Artwork(url: s.cover, size: size, radius: 16 * k, seed: s.title),
+      ),
+      Positioned(
+        left: -8 * k,
+        bottom: -8 * k,
+        child: Container(
+          width: 44 * k,
+          height: 44 * k,
+          decoration: BoxDecoration(
+            color: Ly.night,
+            borderRadius: BorderRadius.circular(12 * k),
+            border: Border.all(color: Ly.night, width: 3 * k),
+          ),
+          child: StationLogo(size: 44 * k - 6 * k, radius: 9 * k),
+        ),
+      ),
+    ]);
   }
 }
 
