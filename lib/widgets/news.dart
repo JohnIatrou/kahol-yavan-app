@@ -108,7 +108,12 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
     final p = posts.isEmpty ? null : posts[_i % posts.length];
     final w = _weather.isEmpty ? null : _weather[_w % _weather.length];
     String two(int n) => n.toString().padLeft(2, '0');
-    final clock = 'יום ${kDayNames[_now.weekday % 7]} ${two(_now.day)}.${two(_now.month)}.${_now.year} · ${two(_now.hour)}:${two(_now.minute)}';
+    final day = _now.weekday % 7;
+    // TV: the short date ("יום א 25.10.26") leaves the headline more room.
+    final date = big
+        ? 'יום ${_dayLetters[day]} ${two(_now.day)}.${two(_now.month)}.${two(_now.year % 100)}'
+        : 'יום ${kDayNames[day]} ${two(_now.day)}.${two(_now.month)}.${_now.year}';
+    final clock = '$date · ${two(_now.hour)}:${two(_now.minute)}';
     final label = Container(
       padding: EdgeInsets.symmetric(horizontal: big ? 11 : 9, vertical: 3),
       decoration: BoxDecoration(color: Ly.live, borderRadius: BorderRadius.circular(6)),
@@ -153,7 +158,22 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
           decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Ly.line))),
           // TV: one line. Phone: the headline gets its own line, with the date, time and weather under it.
           child: big
-              ? SizedBox(height: 40, child: Row(children: [label, const SizedBox(width: 16), news, const SizedBox(width: 16), ...info]))
+              ? SizedBox(
+                  height: 40,
+                  child: Row(children: [
+                    // The station's "כחול יוון +" logo opens the line.
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: Image.asset('assets/brand/kahol-yavan-plus.png', width: 32, height: 32, filterQuality: FilterQuality.medium),
+                    ),
+                    const SizedBox(width: 12),
+                    label,
+                    const SizedBox(width: 16),
+                    news,
+                    const SizedBox(width: 16),
+                    ...info,
+                  ]),
+                )
               : Column(mainAxisSize: MainAxisSize.min, children: [
                   SizedBox(height: 34, child: Row(children: [label, const SizedBox(width: 10), news])),
                   SizedBox(height: 30, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: info)),
@@ -168,6 +188,8 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
         child: SlideTransition(position: Tween(begin: const Offset(0, .5), end: Offset.zero).animate(a), child: child),
       );
 }
+
+const _dayLetters = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'];
 
 /// An animated weather icon (Meteocons) for a WMO weather code.
 class WeatherIcon extends StatelessWidget {
