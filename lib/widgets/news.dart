@@ -107,65 +107,65 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
     final p = posts.isEmpty ? null : posts[_i % posts.length];
     final w = _weather.isEmpty ? null : _weather[_w % _weather.length];
     String two(int n) => n.toString().padLeft(2, '0');
-    final clock = big
-        ? 'יום ${kDayNames[_now.weekday % 7]} ${two(_now.day)}.${two(_now.month)}.${_now.year} · ${two(_now.hour)}:${two(_now.minute)}'
-        : '${two(_now.day)}.${two(_now.month)} · ${two(_now.hour)}:${two(_now.minute)}';
+    final clock = 'יום ${kDayNames[_now.weekday % 7]} ${two(_now.day)}.${two(_now.month)}.${_now.year} · ${two(_now.hour)}:${two(_now.minute)}';
+    final label = Container(
+      padding: EdgeInsets.symmetric(horizontal: big ? 11 : 9, vertical: 3),
+      decoration: BoxDecoration(color: Ly.live, borderRadius: BorderRadius.circular(6)),
+      child: Text('עדכונים', style: TextStyle(fontSize: fs, fontWeight: FontWeight.w800, color: Colors.white)),
+    );
+    final news = Expanded(
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 450),
+        transitionBuilder: _slide,
+        child: Align(
+          key: ValueKey(p?.id),
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(p == null ? '' : tickerLine(p), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: fs, fontWeight: FontWeight.w600)),
+        ),
+      ),
+    );
+    final info = <Widget>[
+      Text(clock, style: TextStyle(fontSize: fs, color: Ly.sky, fontWeight: FontWeight.w700, fontFeatures: const [FontFeature.tabularFigures()])),
+      if (w != null) Padding(padding: EdgeInsets.symmetric(horizontal: big ? 12 : 8), child: Text('|', style: TextStyle(fontSize: fs, color: Ly.line))),
+      // The weather in Israel's main cities, one city at a time.
+      AnimatedSwitcher(
+        duration: const Duration(milliseconds: 450),
+        transitionBuilder: _slide,
+        child: w == null
+            ? const SizedBox.shrink()
+            : Row(key: ValueKey(w.city), mainAxisSize: MainAxisSize.min, children: [
+                Text(w.city, style: TextStyle(fontSize: fs, fontWeight: FontWeight.w700)),
+                SizedBox(width: big ? 8 : 6),
+                WeatherIcon(code: w.code, day: w.day, size: fs + 9),
+                SizedBox(width: big ? 6 : 4),
+                Text('\u200E${w.temp}°',
+                    style: TextStyle(fontSize: fs, color: Ly.sky, fontWeight: FontWeight.w800, fontFeatures: const [FontFeature.tabularFigures()])),
+              ]),
+      ),
+    ];
     return Material(
       color: Ly.night,
       child: InkWell(
         onTap: p == null || big ? null : () => openUrl(p.link),
         child: Container(
-          height: big ? 40 : 38,
           padding: EdgeInsets.symmetric(horizontal: big ? 48 : 12),
           decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Ly.line))),
-          child: Row(children: [
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: big ? 11 : 9, vertical: 3),
-              decoration: BoxDecoration(color: Ly.live, borderRadius: BorderRadius.circular(6)),
-              child: Text('עדכונים', style: TextStyle(fontSize: fs, fontWeight: FontWeight.w800, color: Colors.white)),
-            ),
-            SizedBox(width: big ? 16 : 10),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 450),
-                transitionBuilder: (child, a) => FadeTransition(
-                  opacity: a,
-                  child: SlideTransition(position: Tween(begin: const Offset(0, .5), end: Offset.zero).animate(a), child: child),
-                ),
-                child: Align(
-                  key: ValueKey(p?.id),
-                  alignment: AlignmentDirectional.centerStart,
-                  child: Text(p == null ? '' : tickerLine(p),
-                      maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: fs, fontWeight: FontWeight.w600)),
-                ),
-              ),
-            ),
-            SizedBox(width: big ? 16 : 10),
-            Text(clock, style: TextStyle(fontSize: fs, color: Ly.sky, fontWeight: FontWeight.w700, fontFeatures: const [FontFeature.tabularFigures()])),
-            if (w != null) Padding(padding: EdgeInsets.symmetric(horizontal: big ? 12 : 7), child: Text('|', style: TextStyle(fontSize: fs, color: Ly.line))),
-            // The weather in Israel's main cities, one city at a time.
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 450),
-              transitionBuilder: (child, a) => FadeTransition(
-                opacity: a,
-                child: SlideTransition(position: Tween(begin: const Offset(0, .5), end: Offset.zero).animate(a), child: child),
-              ),
-              child: w == null
-                  ? const SizedBox.shrink()
-                  : Row(key: ValueKey(w.city), mainAxisSize: MainAxisSize.min, children: [
-                      Text(w.city, style: TextStyle(fontSize: fs, fontWeight: FontWeight.w700)),
-                      SizedBox(width: big ? 8 : 6),
-                      WeatherIcon(code: w.code, day: w.day, size: fs + 5),
-                      SizedBox(width: big ? 6 : 4),
-                      Text('\u200E${w.temp}°',
-                          style: TextStyle(fontSize: fs, color: Ly.sky, fontWeight: FontWeight.w800, fontFeatures: const [FontFeature.tabularFigures()])),
-                    ]),
-            ),
-          ]),
+          // TV: one line. Phone: the headline gets its own line, with the date, time and weather under it.
+          child: big
+              ? SizedBox(height: 40, child: Row(children: [label, const SizedBox(width: 16), news, const SizedBox(width: 16), ...info]))
+              : Column(mainAxisSize: MainAxisSize.min, children: [
+                  SizedBox(height: 34, child: Row(children: [label, const SizedBox(width: 10), news])),
+                  SizedBox(height: 28, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: info)),
+                ]),
         ),
       ),
     );
   }
+
+  static Widget _slide(Widget child, Animation<double> a) => FadeTransition(
+        opacity: a,
+        child: SlideTransition(position: Tween(begin: const Offset(0, .5), end: Offset.zero).animate(a), child: child),
+      );
 }
 
 /// A coloured icon for a WMO weather code.
