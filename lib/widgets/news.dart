@@ -168,7 +168,11 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
                       width: 42,
                       height: 26,
                       decoration: BoxDecoration(color: const Color(0xFFF4B740), borderRadius: BorderRadius.circular(13)),
-                      child: const Icon(Icons.add_rounded, size: 22, color: Ly.night),
+                      // The "+" drawn from two bars, like in the logo file.
+                      child: Stack(alignment: Alignment.center, children: [
+                        for (final (w, h) in const [(16.0, 5.0), (5.0, 16.0)])
+                          Container(width: w, height: h, decoration: BoxDecoration(color: Ly.night, borderRadius: BorderRadius.circular(1.5))),
+                      ]),
                     ),
                     const SizedBox(width: 14),
                     label,
