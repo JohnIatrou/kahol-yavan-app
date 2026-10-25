@@ -46,7 +46,6 @@ class TvHome extends StatelessWidget {
                     ]),
                   ),
                   const _LatestEpisodes(),
-                  TvRow(title: 'שודרו לאחרונה', height: 200, children: s.recent.map(_song).toList()),
                   TvRow(title: 'הכי מושמעים השבוע', height: 200, children: s.most.map(_song).toList()),
                   TvRow(
                     title: 'טופ 5 – המצעד היווני',
@@ -99,8 +98,8 @@ class _Hero extends StatelessWidget {
         border: Border.all(color: Ly.line),
       ),
       child: Row(children: [
-        NowCover(song: now, size: 200),
-        const SizedBox(width: 32),
+        NowCover(song: now, size: 170),
+        const SizedBox(width: 24),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Wrap(spacing: 14, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
@@ -132,6 +131,10 @@ class _Hero extends StatelessWidget {
             ]),
           ]),
         ),
+        if (s.recent.isNotEmpty) ...[
+          const SizedBox(width: 20),
+          _RecentColumn(songs: s.recent.take(5).toList()),
+        ],
         const SizedBox(width: 24),
         const _TvLiveButton(),
       ]),
@@ -187,6 +190,44 @@ class _StudioQr extends StatelessWidget {
   static String _phone(String n) {
     final local = n.startsWith('972') ? '0${n.substring(3)}' : n;
     return local.length == 10 ? '${local.substring(0, 3)}-${local.substring(3, 6)}-${local.substring(6)}' : local;
+  }
+}
+
+/// "שודרו לאחרונה" inside the player: the last songs with the time they were played. Only to read, not to select.
+class _RecentColumn extends StatelessWidget {
+  const _RecentColumn({required this.songs});
+  final List<Song> songs;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 230,
+      padding: const EdgeInsetsDirectional.only(start: 16),
+      decoration: const BoxDecoration(border: BorderDirectional(start: BorderSide(color: Ly.line))),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+        const Text('שודרו לאחרונה', style: TextStyle(color: Ly.muted, fontSize: 13, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 6),
+        for (final x in songs)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: Row(children: [
+              SizedBox(
+                width: 42,
+                child: Text(x.airTime,
+                    style: const TextStyle(color: Ly.sky, fontSize: 13, fontWeight: FontWeight.w800, fontFeatures: [FontFeature.tabularFigures()])),
+              ),
+              x.cover.isEmpty ? const StationLogo(size: 32, radius: 7) : Artwork(url: x.cover, size: 32, radius: 7, seed: x.title),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(x.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+                  Text(x.artist, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Ly.muted, fontSize: 11)),
+                ]),
+              ),
+            ]),
+          ),
+      ]),
+    );
   }
 }
 

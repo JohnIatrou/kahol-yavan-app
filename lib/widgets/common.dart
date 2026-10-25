@@ -136,27 +136,6 @@ class NowCover extends StatelessWidget {
   }
 }
 
-/// A small logo tight in a picture's bottom corner (the end side), framed on its inner edges.
-class CornerBadge extends StatelessWidget {
-  const CornerBadge({super.key, required this.child, this.radius = 10});
-  final Widget child;
-  final double radius;
-
-  @override
-  Widget build(BuildContext context) {
-    final inner = BorderRadiusDirectional.only(topStart: Radius.circular(radius));
-    return Container(
-      padding: const EdgeInsetsDirectional.only(top: 2, start: 2),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.9),
-        borderRadius: inner,
-        boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6)],
-      ),
-      child: ClipRRect(borderRadius: BorderRadiusDirectional.only(topStart: Radius.circular(radius - 2)), child: child),
-    );
-  }
-}
-
 /// A cover or photo from the site, or a coloured tile when there is none.
 class Artwork extends StatelessWidget {
   const Artwork({super.key, required this.url, this.size = 56, this.height, this.radius = 10, this.seed = ''});

@@ -200,7 +200,7 @@ class _MagazineSlidesState extends State<MagazineSlides> with _Feed {
                 ),
                 PositionedDirectional(
                   start: 16,
-                  end: 92,
+                  end: 84,
                   bottom: 12,
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
                     Text(p.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900, height: 1.2)),
@@ -209,14 +209,21 @@ class _MagazineSlidesState extends State<MagazineSlides> with _Feed {
                         maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Ly.fresh, fontSize: 13, fontWeight: FontWeight.w700)),
                   ]),
                 ),
-                // The site's logo tight in the corner, as the station logo on the song cover.
+                // The site's logo in a small light square, framed like the station logo on the song cover.
                 PositionedDirectional(
-                  bottom: 0,
-                  end: 0,
-                  child: CornerBadge(
-                    radius: 8,
-                    child: Image.network(kSiteLogoUrl, width: 74, height: 38, fit: BoxFit.cover, webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
-                        errorBuilder: (_, _, _) => const SizedBox(width: 74, height: 38)),
+                  bottom: 12,
+                  end: 12,
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE6E6E6),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Ly.night, width: 3),
+                    ),
+                    child: Image.network(kSiteLogoUrl, fit: BoxFit.contain, webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+                        errorBuilder: (_, _, _) => const SizedBox.shrink()),
                   ),
                 ),
               ]),

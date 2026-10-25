@@ -114,6 +114,9 @@ class Song {
   final int count;
   final int rank;
 
+  /// When the song was played (recent songs only).
+  final DateTime? at;
+
   const Song({
     required this.title,
     required this.artist,
@@ -123,6 +126,7 @@ class Song {
     this.isNew = false,
     this.count = 0,
     this.rank = 0,
+    this.at,
   });
 
   factory Song.fromJson(Map<String, dynamic> j) => Song(
@@ -134,7 +138,11 @@ class Song {
         isNew: j['isNew'] == true,
         count: _i(j['count']),
         rank: _i(j['rank']),
+        at: _i(j['at']) > 0 ? DateTime.fromMillisecondsSinceEpoch(_i(j['at'])) : null,
       );
+
+  /// "14:05", when the song was played.
+  String get airTime => at == null ? '' : '${at!.hour.toString().padLeft(2, '0')}:${at!.minute.toString().padLeft(2, '0')}';
 }
 
 /// GET /lym/v1/studio – what the studio computer sent last (every 20 seconds when something changes).
