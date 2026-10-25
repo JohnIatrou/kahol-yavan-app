@@ -146,10 +146,10 @@ class _Hero extends StatelessWidget {
               ]),
             ),
             if (s.nextName.isNotEmpty)
-              Flexible(
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
-                  alignment: AlignmentDirectional.centerEnd,
                   child: Pill('התכנית הבאה: ${s.nextName} · ${s.nextStart}', size: 13, color: Ly.cream),
                 ),
               ),
