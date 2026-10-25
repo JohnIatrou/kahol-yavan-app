@@ -159,14 +159,18 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
           // TV: one line. Phone: the headline gets its own line, with the date, time and weather under it.
           child: big
               ? SizedBox(
-                  height: 40,
+                  height: 60,
                   child: Row(children: [
                     // The station's "כחול יוון +" logo opens the line.
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: Image.asset('assets/brand/kahol-yavan-plus.png', width: 32, height: 32, filterQuality: FilterQuality.medium),
+                    Image.asset('assets/brand/kahol-yavan-logo.png', height: 54, filterQuality: FilterQuality.medium),
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 42,
+                      height: 26,
+                      decoration: BoxDecoration(color: const Color(0xFFF4B740), borderRadius: BorderRadius.circular(13)),
+                      child: const Icon(Icons.add_rounded, size: 22, color: Ly.night),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
                     label,
                     const SizedBox(width: 16),
                     news,
