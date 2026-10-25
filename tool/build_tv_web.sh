@@ -14,7 +14,7 @@ app=$out/app
 # Only CanvasKit is used (see build_preview.sh).
 rm -rf "$app"/canvaskit/{skwasm*,wimp*,webparagraph,*.symbols} "$app"/canvaskit/chromium/*.symbols "$app"/flutter_service_worker.js
 # The TVs open the app from a local folder, not from the site root.
-sed -i 's|<base href="/">|<base href="./">|; s|<title>[^<]*</title>|<title>כחול יוון פלוס</title>|' "$app/index.html"
+sed -i 's|<base href="/">|<base href="./">|; s|<title>[^<]*</title>|<title>רדיו כחול יוון פלוס</title>|' "$app/index.html"
 cp tv-web/tv-boot.js "$app/"
 sed -i 's|</head>|  <script src="tv-boot.js"></script>\n</head>|' "$app/index.html"
 grep -q tv-boot.js "$app/index.html"

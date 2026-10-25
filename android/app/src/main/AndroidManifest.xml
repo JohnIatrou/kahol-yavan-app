@@ -38,11 +38,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <!-- Android TV / Google TV / Fire TV list the app under its TV name, "כחול יוון פלוס". -->
+        <!-- Android TV / Google TV / Fire TV list the app under its TV name, "רדיו כחול יוון פלוס". -->
         <activity-alias
             android:name=".TvLauncher"
             android:targetActivity=".MainActivity"
-            android:label="כחול יוון פלוס"
+            android:label="רדיו כחול יוון פלוס"
             android:banner="@drawable/tv_banner"
             android:exported="true">
             <intent-filter>
