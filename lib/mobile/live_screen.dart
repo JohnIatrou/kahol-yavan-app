@@ -34,8 +34,6 @@ class LiveScreen extends StatelessWidget {
                   mark: Ly.fresh,
                   child: Column(children: s.most.take(10).map((x) => SongTile(song: x, trailing: x.count > 0 ? '${x.count} השמעות' : null)).toList()),
                 ),
-              if (s.top.isNotEmpty)
-                Panel(title: 'טופ 5 – המצעד היווני', mark: Ly.live, child: Column(children: s.top.take(5).map((x) => SongTile(song: x)).toList())),
               if (s.fresh.isNotEmpty)
                 Panel(title: 'שירים חדשים בפלייליסט', mark: Ly.wa, child: Column(children: s.fresh.take(10).map((x) => SongTile(song: x)).toList())),
               if (st.schedule.isNotEmpty) const SchedulePanel(),

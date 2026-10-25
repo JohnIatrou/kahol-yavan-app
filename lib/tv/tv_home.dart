@@ -47,11 +47,6 @@ class TvHome extends StatelessWidget {
                   ),
                   const _LatestEpisodes(),
                   TvRow(title: 'הכי מושמעים השבוע', height: 200, children: s.most.map(_song).toList()),
-                  TvRow(
-                    title: 'טופ 5 – המצעד היווני',
-                    height: 200,
-                    children: s.top.take(5).map((x) => TvSongCard(title: x.title, artist: x.artist, cover: x.cover, badge: '#${x.rank}')).toList(),
-                  ),
                   TvRow(title: 'שירים חדשים', height: 200, children: s.fresh.map(_song).toList()),
                   TvRow(title: 'לוח התכניות', height: 130, children: _fromToday(st.schedule).map((sh) => _ScheduleCard(show: sh)).toList()),
                 ],
