@@ -14,6 +14,7 @@ import 'push.dart';
 import 'state.dart';
 import 'theme.dart';
 import 'tv/tv_home.dart';
+import 'tv/tv_platform.dart';
 import 'widgets/common.dart';
 
 Future<void> main() async {
@@ -38,12 +39,12 @@ Future<void> main() async {
   if (!tv) push.init();
 }
 
-/// Android TV and Google TV declare the "leanback" feature.
+/// Android TV and Google TV declare the "leanback" feature, Amazon Fire TV its own one too.
 Future<bool> _isTv() async {
   if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return false;
   try {
     final info = await DeviceInfoPlugin().androidInfo;
-    return info.systemFeatures.contains('android.software.leanback');
+    return info.systemFeatures.contains('android.software.leanback') || info.systemFeatures.contains('amazon.hardware.fire_tv');
   } catch (_) {
     return false;
   }
@@ -67,6 +68,20 @@ class _RadioAppState extends State<RadioApp> {
   void initState() {
     super.initState();
     widget.push.onOpen = _openFromNotification;
+    if (widget.tv) {
+      listenTvRemote(
+        back: () {
+          final nav = _nav.currentState;
+          if (nav == null || !nav.canPop()) return false;
+          nav.pop();
+          return true;
+        },
+        playPause: () {
+          final a = widget.state.audio;
+          a.playbackState.value.playing ? a.pause() : a.play();
+        },
+      );
+    }
   }
 
   /// A notification was tapped: play the episode, start the live stream, or open the link.

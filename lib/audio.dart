@@ -2,13 +2,19 @@ import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 
 import 'api.dart';
+import 'config.dart';
 
 const kLiveId = 'live';
+const _kArchiveId = 'archive';
+const _kShowPrefix = 'show-';
+const _kEpisodePrefix = 'ep-';
 
 /// One player for the live stream and the archive episodes. Through audio_service it keeps playing with the
 /// screen off, shows lock-screen / notification controls, and answers the TV remote and headphone buttons.
+///
+/// It also answers Android Auto: the live stream and the archive (shows → episodes) to browse from the car.
 class RadioHandler extends BaseAudioHandler with SeekHandler {
-  RadioHandler() {
+  RadioHandler({Api? api}) : _api = api ?? Api() {
     _player.playbackEventStream.listen((_) => _broadcast());
     _player.playingStream.listen((_) => _broadcast());
     _player.processingStateStream.listen((s) {
@@ -18,6 +24,9 @@ class RadioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   final _player = AudioPlayer();
+  final Api _api;
+  // Episodes seen while browsing in the car, so a tap on one can play it.
+  final _episodes = <String, Episode>{};
   AppConfig _config = AppConfig.fallback;
   Episode? _episode;
 
@@ -45,14 +54,7 @@ class RadioHandler extends BaseAudioHandler with SeekHandler {
 
   Future<void> playEpisode(Episode e) async {
     _episode = e;
-    mediaItem.add(MediaItem(
-      id: 'ep-${e.id}',
-      title: e.title,
-      album: _config.name,
-      artist: e.label,
-      artUri: e.picture.isNotEmpty ? Uri.tryParse(e.picture) : null,
-      duration: e.duration > 0 ? Duration(seconds: e.duration.round()) : null,
-    ));
+    mediaItem.add(_episodeItem(e));
     try {
       await _player.setUrl(e.audio);
       await _player.play();
@@ -60,6 +62,72 @@ class RadioHandler extends BaseAudioHandler with SeekHandler {
       _broadcast(error: true);
     }
   }
+
+  MediaItem _episodeItem(Episode e) => MediaItem(
+        id: '$_kEpisodePrefix${e.id}',
+        title: e.title,
+        album: _config.name,
+        artist: e.label,
+        artUri: e.picture.isNotEmpty ? Uri.tryParse(e.picture) : null,
+        duration: e.duration > 0 ? Duration(seconds: e.duration.round()) : null,
+        playable: true,
+      );
+
+  // Android Auto: the car's media browser.
+  @override
+  Future<List<MediaItem>> getChildren(String parentMediaId, [Map<String, dynamic>? options]) async {
+    try {
+      if (parentMediaId == AudioService.browsableRootId) {
+        return [
+          MediaItem(
+            id: kLiveId,
+            title: 'שידור חי',
+            album: _config.name,
+            artist: _config.name,
+            artUri: Uri.parse(kLogoUrl),
+            playable: true,
+            isLive: true,
+          ),
+          const MediaItem(id: _kArchiveId, title: 'ארכיון התוכניות', playable: false),
+        ];
+      }
+      if (parentMediaId == AudioService.recentRootId) return [?mediaItem.value];
+      if (parentMediaId == _kArchiveId) {
+        return [
+          for (final s in await _api.shows())
+            if (s.count > 0)
+              MediaItem(
+                id: '$_kShowPrefix${s.id}',
+                title: s.name,
+                artist: s.when,
+                artUri: s.picture.isNotEmpty ? Uri.tryParse(s.picture) : null,
+                playable: false,
+              ),
+        ];
+      }
+      if (parentMediaId.startsWith(_kShowPrefix)) {
+        final page = await _api.episodes(show: int.parse(parentMediaId.substring(_kShowPrefix.length)));
+        return [
+          for (final e in page.episodes)
+            if (e.playable) _episodeItem(_remember(e)),
+        ];
+      }
+    } catch (_) {}
+    return const [];
+  }
+
+  Episode _remember(Episode e) => _episodes['$_kEpisodePrefix${e.id}'] = e;
+
+  @override
+  Future<void> playFromMediaId(String mediaId, [Map<String, dynamic>? extras]) async {
+    final e = _episodes[mediaId];
+    if (e != null) return playEpisode(e);
+    if (mediaId == kLiveId) return playLive();
+  }
+
+  // The car's voice search ("play Kahol Yavan") starts the live stream.
+  @override
+  Future<void> playFromSearch(String query, [Map<String, dynamic>? extras]) => playLive();
 
   MediaItem _liveItem(Song? now, String program) => MediaItem(
         id: kLiveId,

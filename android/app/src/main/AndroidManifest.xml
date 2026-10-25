@@ -60,6 +60,10 @@
             </intent-filter>
         </receiver>
 
+        <!-- Android Auto: the car lists the app as a media source (live stream and archive). -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc"/>
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_notification"/>

@@ -1,0 +1,31 @@
+# Builds the TV app for Samsung (Tizen, .wgt) and LG (webOS, .ipk) as a downloadable artifact.
+# The .wgt still needs the Samsung author/distributor signature (Tizen Studio) before Seller Office takes it.
+name: Samsung and LG TV
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.7
+          channel: stable
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install -g @webos-tools/cli@3.2.6
+      - run: flutter pub get
+      - run: tool/build_tv_web.sh flutter ares-package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kahol-yavan-tv-web-${{ github.run_number }}
+          path: |
+            build/tv-web/*.wgt
+            build/tv-web/*.ipk

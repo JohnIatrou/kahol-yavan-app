@@ -1,0 +1,13 @@
+{
+  "id": "il.co.leylotyavan.radio",
+  "version": "@VERSION@",
+  "vendor": "Leylot Yavan",
+  "type": "web",
+  "main": "index.html",
+  "title": "רדיו כחול יוון",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": true,
+  "requiredACG": []
+}
