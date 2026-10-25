@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../api.dart';
 import '../config.dart';
+import '../state.dart';
 import '../theme.dart';
 import 'common.dart';
 
@@ -52,6 +53,7 @@ class NewsTicker extends StatefulWidget {
 class _NewsTickerState extends State<NewsTicker> with _Feed {
   int _i = 0;
   int _w = 0;
+  DateTime _now = DateTime.now();
   List<CityWeather> _weather = const [];
   Timer? _tick;
   Timer? _weatherReload;
@@ -67,8 +69,8 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
       if (!mounted) return;
       final news = t.tick % 6 == 0 && posts.length > 1;
       final city = t.tick % 10 == 0 && _weather.length > 1;
-      if (!news && !city) return;
       setState(() {
+        _now = DateTime.now();
         if (news) _i = (_i + 1) % posts.length;
         if (city) _w = (_w + 1) % _weather.length;
       });
@@ -104,6 +106,10 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
     final fs = big ? 15.0 : 13.0;
     final p = posts.isEmpty ? null : posts[_i % posts.length];
     final w = _weather.isEmpty ? null : _weather[_w % _weather.length];
+    String two(int n) => n.toString().padLeft(2, '0');
+    final clock = big
+        ? 'יום ${kDayNames[_now.weekday % 7]} ${two(_now.day)}.${two(_now.month)}.${_now.year} · ${two(_now.hour)}:${two(_now.minute)}'
+        : '${two(_now.day)}.${two(_now.month)} · ${two(_now.hour)}:${two(_now.minute)}';
     return Material(
       color: Ly.night,
       child: InkWell(
@@ -135,6 +141,8 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
               ),
             ),
             SizedBox(width: big ? 16 : 10),
+            Text(clock, style: TextStyle(fontSize: fs, color: Ly.sky, fontWeight: FontWeight.w700, fontFeatures: const [FontFeature.tabularFigures()])),
+            if (w != null) Padding(padding: EdgeInsets.symmetric(horizontal: big ? 12 : 7), child: Text('|', style: TextStyle(fontSize: fs, color: Ly.line))),
             // The weather in Israel's main cities, one city at a time.
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 450),
