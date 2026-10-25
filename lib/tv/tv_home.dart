@@ -100,7 +100,6 @@ class _Hero extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Wrap(spacing: 14, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
               const LiveBadge(big: true),
-              const StationBadge(width: 96),
               Text(c.name, style: const TextStyle(color: Ly.sky, fontSize: 24, fontWeight: FontWeight.w800)),
               if (s.program.isNotEmpty) Text('•  ${s.program}', style: const TextStyle(color: Ly.muted, fontSize: 18)),
             ]),
