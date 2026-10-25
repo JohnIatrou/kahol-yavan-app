@@ -385,6 +385,31 @@ String _plain(String html) {
       .trim();
 }
 
+/// The weather now in one city (Open-Meteo, no key needed).
+class CityWeather {
+  final String city;
+  final int temp;
+
+  /// WMO weather code: 0 clear, 1–3 clouds, 45/48 fog, 51–67 and 80–82 rain, 71–77 and 85/86 snow, 95–99 storm.
+  final int code;
+  final bool day;
+  const CityWeather(this.city, this.temp, this.code, this.day);
+}
+
+/// The main cities in Israel, shown one by one in the news line.
+const kIsraelCities = [
+  ('ירושלים', 31.78, 35.22),
+  ('תל אביב', 32.08, 34.78),
+  ('חיפה', 32.79, 34.99),
+  ('באר שבע', 31.25, 34.79),
+  ('אילת', 29.56, 34.95),
+  ('טבריה', 32.79, 35.53),
+  ('נתניה', 32.33, 34.86),
+  ('אשדוד', 31.80, 34.65),
+  ('נצרת', 32.70, 35.30),
+  ('ים המלח', 31.50, 35.40),
+];
+
 class ChatReply {
   final String reply;
   final List<Link> cards;
@@ -461,6 +486,30 @@ class Api {
       final posts = _list(jsonDecode(utf8.decode(r.bodyBytes))).map(Update.fromWp).toList();
       return PostPage(posts, _i(r.headers['x-wp-totalpages']));
     }
+  }
+
+  /// The weather now in every city of kIsraelCities, in one request.
+  Future<List<CityWeather>> israelWeather() async {
+    final uri = Uri.https('api.open-meteo.com', '/v1/forecast', {
+      'latitude': kIsraelCities.map((c) => c.$2).join(','),
+      'longitude': kIsraelCities.map((c) => c.$3).join(','),
+      'current': 'temperature_2m,weather_code,is_day',
+      'timezone': 'Asia/Jerusalem',
+    });
+    final r = await _http.get(uri).timeout(const Duration(seconds: 15));
+    if (r.statusCode != 200) throw ApiError('שגיאה ${r.statusCode}');
+    final j = jsonDecode(utf8.decode(r.bodyBytes));
+    final rows = j is List ? j : [j];
+    return [
+      for (var i = 0; i < rows.length && i < kIsraelCities.length; i++)
+        if ((rows[i] as Map)['current'] is Map)
+          CityWeather(
+            kIsraelCities[i].$1,
+            _d(rows[i]['current']['temperature_2m']).round(),
+            _i(rows[i]['current']['weather_code']),
+            _i(rows[i]['current']['is_day']) == 1,
+          ),
+    ];
   }
 
   Future<({int id, String token, String reply})> chatStart(String name, String phone, String subject) async {

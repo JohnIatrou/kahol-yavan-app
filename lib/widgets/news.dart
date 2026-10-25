@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../api.dart';
 import '../config.dart';
-import '../state.dart';
 import '../theme.dart';
 import 'common.dart';
 
@@ -52,8 +51,10 @@ class NewsTicker extends StatefulWidget {
 
 class _NewsTickerState extends State<NewsTicker> with _Feed {
   int _i = 0;
-  DateTime _now = DateTime.now();
+  int _w = 0;
+  List<CityWeather> _weather = const [];
   Timer? _tick;
+  Timer? _weatherReload;
 
   @override
   Future<List<Update>> fetch(Api api) => api.updates();
@@ -61,18 +62,39 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
   @override
   void initState() {
     super.initState();
+    // A new headline every 6 seconds, the next city every 10.
     _tick = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) return;
+      final news = t.tick % 6 == 0 && posts.length > 1;
+      final city = t.tick % 10 == 0 && _weather.length > 1;
+      if (!news && !city) return;
       setState(() {
-        _now = DateTime.now();
-        if (t.tick % 6 == 0 && posts.length > 1) _i = (_i + 1) % posts.length;
+        if (news) _i = (_i + 1) % posts.length;
+        if (city) _w = (_w + 1) % _weather.length;
       });
     });
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_weatherReload == null) {
+      _loadWeather();
+      _weatherReload = Timer.periodic(const Duration(minutes: 30), (_) => _loadWeather());
+    }
+  }
+
+  Future<void> _loadWeather() async {
+    try {
+      final w = await Scope.of(context).state.api.israelWeather();
+      if (mounted && w.isNotEmpty) setState(() => _weather = w);
+    } catch (_) {}
+  }
+
+  @override
   void dispose() {
     _tick?.cancel();
+    _weatherReload?.cancel();
     super.dispose();
   }
 
@@ -81,8 +103,7 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
     final big = widget.big;
     final fs = big ? 15.0 : 13.0;
     final p = posts.isEmpty ? null : posts[_i % posts.length];
-    String two(int n) => n.toString().padLeft(2, '0');
-    final clock = 'יום ${kDayNames[_now.weekday % 7]} ${two(_now.day)}.${two(_now.month)}.${_now.year} · ${two(_now.hour)}:${two(_now.minute)}';
+    final w = _weather.isEmpty ? null : _weather[_w % _weather.length];
     return Material(
       color: Ly.night,
       child: InkWell(
@@ -114,12 +135,51 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
               ),
             ),
             SizedBox(width: big ? 16 : 10),
-            Text(big ? clock : '${two(_now.day)}.${two(_now.month)} · ${two(_now.hour)}:${two(_now.minute)}',
-                style: TextStyle(fontSize: fs, color: Ly.sky, fontWeight: FontWeight.w700, fontFeatures: const [FontFeature.tabularFigures()])),
+            // The weather in Israel's main cities, one city at a time.
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 450),
+              transitionBuilder: (child, a) => FadeTransition(
+                opacity: a,
+                child: SlideTransition(position: Tween(begin: const Offset(0, .5), end: Offset.zero).animate(a), child: child),
+              ),
+              child: w == null
+                  ? const SizedBox.shrink()
+                  : Row(key: ValueKey(w.city), mainAxisSize: MainAxisSize.min, children: [
+                      Text(w.city, style: TextStyle(fontSize: fs, fontWeight: FontWeight.w700)),
+                      SizedBox(width: big ? 8 : 6),
+                      WeatherIcon(code: w.code, day: w.day, size: fs + 5),
+                      SizedBox(width: big ? 6 : 4),
+                      Text('\u200E${w.temp}°',
+                          style: TextStyle(fontSize: fs, color: Ly.sky, fontWeight: FontWeight.w800, fontFeatures: const [FontFeature.tabularFigures()])),
+                    ]),
+            ),
           ]),
         ),
       ),
     );
+  }
+}
+
+/// A coloured icon for a WMO weather code.
+class WeatherIcon extends StatelessWidget {
+  const WeatherIcon({super.key, required this.code, this.day = true, this.size = 18});
+  final int code;
+  final bool day;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final (icon, color) = switch (code) {
+      0 => day ? (Icons.wb_sunny, Ly.fresh) : (Icons.nightlight_round, const Color(0xFFDDE3EC)),
+      1 || 2 => day ? (Icons.wb_cloudy, Ly.fresh) : (Icons.nights_stay, const Color(0xFFDDE3EC)),
+      3 => (Icons.cloud, const Color(0xFFC9D2E8)),
+      45 || 48 => (Icons.foggy, const Color(0xFFC9D2E8)),
+      >= 95 => (Icons.thunderstorm, const Color(0xFFFFD166)),
+      >= 71 && <= 77 || 85 || 86 => (Icons.ac_unit, Colors.white),
+      >= 51 && <= 67 || >= 80 && <= 82 => (Icons.water_drop, Ly.sky),
+      _ => (Icons.wb_cloudy, const Color(0xFFC9D2E8)),
+    };
+    return Icon(icon, size: size, color: color);
   }
 }
 
