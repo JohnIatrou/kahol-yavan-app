@@ -43,10 +43,19 @@ jobs:
       - name: Signing key and Firebase file
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STOREPASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
           if [ -n "$KEYSTORE" ]; then
-            echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/upload.jks"
+            # A pasted secret can carry line breaks, spaces, quotes or a byte-order mark: keep only base64 characters.
+            if ! printf '%s' "$KEYSTORE" | tr -cd 'A-Za-z0-9+/=' | base64 -d > "$RUNNER_TEMP/upload.jks" 2>/dev/null; then
+              echo "::error::ANDROID_KEYSTORE_BASE64 is not the keystore: paste the whole content of ANDROID_KEYSTORE_BASE64.txt again."
+              exit 1
+            fi
+            if ! keytool -list -keystore "$RUNNER_TEMP/upload.jks" -storepass "$(printf '%s' "$STOREPASS" | tr -d '\r\n')" > /dev/null 2>&1; then
+              echo "::error::The keystore does not open with ANDROID_KEYSTORE_PASSWORD (or the keystore secret is cut short): paste both secrets again."
+              exit 1
+            fi
             echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
           else
             echo "::warning::No ANDROID_KEYSTORE_BASE64 – the build is signed with a debug key and cannot go to Google Play."

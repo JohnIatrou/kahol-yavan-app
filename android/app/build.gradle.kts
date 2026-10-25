@@ -12,7 +12,8 @@ val keyProps = Properties().apply {
     val f = rootProject.file("key.properties")
     if (f.exists()) f.inputStream().use { load(it) }
 }
-fun signing(name: String, env: String): String? = keyProps.getProperty(name) ?: System.getenv(env)
+// Trimmed: a secret pasted into GitHub can end with a line break.
+fun signing(name: String, env: String): String? = (keyProps.getProperty(name) ?: System.getenv(env))?.trim()?.ifEmpty { null }
 val storePath = signing("storeFile", "ANDROID_KEYSTORE_PATH")
 
 android {
