@@ -10,7 +10,6 @@ import 'package:kahol_yavan_radio_app/audio.dart';
 import 'package:kahol_yavan_radio_app/main.dart';
 import 'package:kahol_yavan_radio_app/push.dart';
 import 'package:kahol_yavan_radio_app/state.dart';
-import 'package:kahol_yavan_radio_app/tv/tv_show_screen.dart';
 
 /// The site's answers, saved from the test site (test/fixtures).
 MockClient fakeSite() => MockClient((req) async {
@@ -43,38 +42,35 @@ String? focusedText(WidgetTester tester) {
 }
 
 void main() {
-  testWidgets('TV: the remote reaches the archive and opens a show', (tester) async {
+  testWidgets('TV: the remote reaches the archive and plays an episode', (tester) async {
     tester.view.physicalSize = const Size(1920, 1080);
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
     final state = await pumpApp(tester, tv: true);
-    expect(state.shows, isNotEmpty);
+    final episodes = (await tester.runAsync(() => state.api.episodes()))!.episodes.where((e) => e.playable).toList();
+    expect(episodes.length, greaterThan(1));
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     // Starts on the big play button.
     expect(focusedText(tester), isEmpty);
 
+    // Down: the archive row ("ארכיון תכניות", the latest episodes), on its first card, not the nearest one.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
-    final first = focusedText(tester)!;
-    final i = state.shows.indexWhere((s) => first.contains(s.name));
-    expect(i, 0, reason: 'down from the play button lands on the first show, not the nearest one');
+    expect(focusedText(tester), startsWith(episodes[0].title), reason: 'down from the play button lands on the first episode');
 
-    // RTL: the next show is to the left, the previous one to the right.
-    await tester.sendKeyEvent(i > 0 ? LogicalKeyboardKey.arrowRight : LogicalKeyboardKey.arrowLeft);
+    // RTL: the next episode is to the left.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pumpAndSettle();
-    expect(focusedText(tester), contains(state.shows[i > 0 ? i - 1 : i + 1].name), reason: 'arrows move along the row');
+    expect(focusedText(tester), startsWith(episodes[1].title), reason: 'arrows move along the row');
 
+    // OK plays it. The player itself is native, so answer its calls with nothing.
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.just_audio.methods'), (_) async => {});
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.just_audio.methods'), null));
     await tester.sendKeyEvent(LogicalKeyboardKey.select);
     await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 200)));
     await tester.pumpAndSettle();
-    expect(find.byType(TvShowScreen), findsOneWidget);
-    expect(find.byType(TvEpisodeCard), findsWidgets);
-
-    // The remote's Back button (a system back on Android TV) returns home.
-    await tester.binding.handlePopRoute();
-    await tester.pumpAndSettle();
-    expect(find.byType(TvShowScreen), findsNothing);
+    expect(state.audio.episode?.id, episodes[1].id);
     state.dispose();
   });
 
