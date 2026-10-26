@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import '../api.dart';
 import 'common.dart';
 
-/// The colours and icon of each playlist style (design B: a card in its own colour, the logo, the name in a white frame).
-const _styles = <String, (Color, Color, String)>{
-  'quiet': (Color(0xFF4FC3F7), Color(0xFF0B3A5C), 'moon'),
-  'happy': (Color(0xFFFF7043), Color(0xFF5C1D0B), 'bouzouki'),
-  'new': (Color(0xFF66BB6A), Color(0xFF123D17), 'sun'),
-  'classics': (Color(0xFFBA68C8), Color(0xFF3B1446), 'temple'),
-  'top20': (Color(0xFFF4B740), Color(0xFF4A3305), 'laurel'),
-  'mega': (Color(0xFFEF5350), Color(0xFF4D0D0D), 'vinyl'),
+/// The colours of each playlist style (design B: a card in its own colour, the logo, the name in a white frame).
+const _styles = <String, (Color, Color)>{
+  'quiet': (Color(0xFF4FC3F7), Color(0xFF0B3A5C)),
+  'happy': (Color(0xFFFF7043), Color(0xFF5C1D0B)),
+  'new': (Color(0xFF66BB6A), Color(0xFF123D17)),
+  'classics': (Color(0xFFBA68C8), Color(0xFF3B1446)),
+  'top20': (Color(0xFFF4B740), Color(0xFF4A3305)),
+  'mega': (Color(0xFFEF5350), Color(0xFF4D0D0D)),
 };
 
 /// A square playlist card, drawn at any [size].
@@ -21,7 +21,7 @@ class PlaylistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (light, dark, icon) = _styles[playlist.key] ?? (const Color(0xFF2A5FB0), const Color(0xFF0D1838), 'vinyl');
+    final (light, dark) = _styles[playlist.key] ?? (const Color(0xFF2A5FB0), const Color(0xFF0D1838));
     final k = size / 205;
     return Container(
       width: size,
@@ -30,21 +30,14 @@ class PlaylistCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(22 * k),
         gradient: LinearGradient(begin: AlignmentDirectional.topEnd, end: AlignmentDirectional.bottomStart, colors: [light, dark]),
       ),
-      child: Stack(children: [
-        // The style's icon, drawn in the logo's style, in the corner.
-        Positioned(top: 10 * k, left: 10 * k, child: Image.asset('assets/playlists/$icon.png', width: 58 * k, height: 58 * k)),
-        Positioned.fill(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            SizedBox(height: 22 * k),
-            Image.asset('assets/brand/kahol-yavan-logo.png', width: 150 * k),
-            SizedBox(height: 14 * k),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16 * k, vertical: 5 * k),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(99)),
-              child: Text(playlist.title,
-                  maxLines: 1, style: TextStyle(color: dark, fontSize: 19 * k, fontWeight: FontWeight.w800, height: 1.25)),
-            ),
-          ]),
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Image.asset('assets/brand/kahol-yavan-logo.png', width: 160 * k),
+        SizedBox(height: 16 * k),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16 * k, vertical: 5 * k),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(99)),
+          child: Text(playlist.title,
+              maxLines: 1, style: TextStyle(color: dark, fontSize: 19 * k, fontWeight: FontWeight.w800, height: 1.25)),
         ),
       ]),
     );
