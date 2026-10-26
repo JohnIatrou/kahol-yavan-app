@@ -287,6 +287,9 @@ class Episode {
   final int show;
   final String link;
 
+  /// The line written for this week's episode on the site (its excerpt); empty on older episodes.
+  final String summary;
+
   const Episode({
     required this.id,
     required this.title,
@@ -298,6 +301,7 @@ class Episode {
     required this.host,
     required this.show,
     required this.link,
+    this.summary = '',
   });
 
   factory Episode.fromJson(Map<String, dynamic> j) => Episode(
@@ -311,6 +315,7 @@ class Episode {
         host: _s(j['host']),
         show: _i(j['show']),
         link: _s(j['link']),
+        summary: _s(j['summary']).trim(),
       );
 
   bool get playable => audio.isNotEmpty;

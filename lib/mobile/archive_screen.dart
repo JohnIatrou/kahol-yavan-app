@@ -196,6 +196,10 @@ class EpisodeTile extends StatelessWidget {
                       .join(' · '),
                   style: const TextStyle(color: Ly.muted, fontSize: 12),
                 ),
+                if (e.summary.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Text(e.summary, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, height: 1.3)),
+                ],
               ]),
             ),
           ]),

@@ -142,6 +142,11 @@ class TvEpisodeCard extends StatelessWidget {
               style: const TextStyle(color: Ly.muted, fontSize: 12),
             ),
           ),
+          if (e.summary.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 2, 12, 0),
+              child: Text(e.summary, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+            ),
         ]),
       ),
     );
