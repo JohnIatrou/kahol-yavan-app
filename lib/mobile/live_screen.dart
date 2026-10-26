@@ -6,6 +6,7 @@ import '../config.dart';
 import '../state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/playlists.dart';
 
 /// "שידור חי": the player and the whole radio board, as on the site's radio page.
 class LiveScreen extends StatelessWidget {
@@ -26,6 +27,8 @@ class LiveScreen extends StatelessWidget {
             children: [
               const LivePlayerCard(),
               const SizedBox(height: 16),
+              const PlaylistsStrip(inset: 0),
+              const SizedBox(height: 8),
               if (s.recent.isNotEmpty)
                 Panel(title: 'שודרו לאחרונה', child: Column(children: s.recent.take(8).map((x) => SongTile(song: x)).toList())),
               if (s.most.isNotEmpty)

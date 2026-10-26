@@ -5,6 +5,7 @@ import '../config.dart';
 import '../push.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/playlists.dart';
 import 'chat_screen.dart';
 
 /// "עוד": contact, notifications, the site and social networks.
@@ -17,6 +18,17 @@ class MoreScreen extends StatelessWidget {
     final c = scope.state.config;
     final push = scope.push;
     return ListView(padding: const EdgeInsets.all(16), children: [
+      Panel(
+        title: 'האזנה',
+        mark: Ly.sky,
+        child: _Row(
+          icon: Icons.queue_music,
+          color: Ly.sky,
+          title: 'פלייליסטים',
+          subtitle: 'שעה שקטה, שעה שמחה, השירים החדשים ועוד',
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PlaylistsScreen())),
+        ),
+      ),
       Panel(
         title: 'דברו איתנו',
         mark: Ly.wa,

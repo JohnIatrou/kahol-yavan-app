@@ -222,9 +222,9 @@ class WeatherIcon extends StatelessWidget {
   Widget build(BuildContext context) => Lottie.asset('assets/weather/$_name.json', width: size, height: size, fit: BoxFit.contain);
 }
 
-/// "DD.MM • HH:MM | title", as on the site. The site's titles usually carry it already.
+/// "DD.MM • HH:MM | title", as on the site. The site's titles usually carry it already, at times after a mark like "🔴 ".
 String tickerLine(Update u) {
-  if (RegExp(r'^\d{1,2}\.\d{1,2}').hasMatch(u.title) || u.date == null) return u.title;
+  if (RegExp(r'^\D{0,4}\d{1,2}\.\d{1,2}').hasMatch(u.title) || u.date == null) return u.title;
   final d = u.date!;
   String two(int n) => n.toString().padLeft(2, '0');
   return '${two(d.day)}.${two(d.month)} • ${two(d.hour)}:${two(d.minute)} | ${u.title}';
