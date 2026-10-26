@@ -124,11 +124,31 @@ class _RadioAppState extends State<RadioApp> {
         builder: widget.tv
             ? (context, child) => CallbackShortcuts(
                   bindings: {const SingleActivator(LogicalKeyboardKey.escape): () => _nav.currentState?.maybePop()},
-                  child: child!,
+                  child: _TvZoom(child: child!),
                 )
             : null,
         home: widget.tv ? const TvHome() : MobileHome(key: _home),
         routes: {'/archive': (_) => const Scaffold(body: ArchiveScreen())},
+      ),
+    );
+  }
+}
+
+/// The TV layout drawn a little smaller than the screen, so it breathes: everything at [zoom] of its size.
+class _TvZoom extends StatelessWidget {
+  const _TvZoom({required this.child});
+  final Widget child;
+  static const zoom = 0.85;
+
+  @override
+  Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final size = mq.size / zoom;
+    return FittedBox(
+      alignment: Alignment.topLeft,
+      child: SizedBox.fromSize(
+        size: size,
+        child: MediaQuery(data: mq.copyWith(size: size), child: child),
       ),
     );
   }
