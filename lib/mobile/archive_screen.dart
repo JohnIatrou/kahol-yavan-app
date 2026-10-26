@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../api.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/playlists.dart';
 
 void playOrOpen(BuildContext context, Episode e) {
   final scope = Scope.of(context);
@@ -39,6 +40,7 @@ class ArchiveScreen extends StatelessWidget {
             ),
           ),
         ),
+        const SliverToBoxAdapter(child: _Playlists()),
         const SliverPadding(
           padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
           sliver: SliverToBoxAdapter(child: Text('פרקים אחרונים', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900))),
@@ -46,6 +48,41 @@ class ArchiveScreen extends StatelessWidget {
         const SliverPadding(padding: EdgeInsets.fromLTRB(16, 0, 16, 24), sliver: SliverToBoxAdapter(child: EpisodeList(show: 0, embedded: true))),
       ]),
     );
+  }
+}
+
+/// The daily playlists, right under the shows.
+class _Playlists extends StatefulWidget {
+  const _Playlists();
+
+  @override
+  State<_Playlists> createState() => _PlaylistsState();
+}
+
+class _PlaylistsState extends State<_Playlists> with PlaylistsLoader {
+  @override
+  Widget build(BuildContext context) {
+    if (playlists.isEmpty) return const SizedBox.shrink();
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Padding(
+        padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
+        child: Text('פלייליסטים', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+      ),
+      SizedBox(
+        height: 150,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: playlists.length,
+          separatorBuilder: (_, _) => const SizedBox(width: 12),
+          itemBuilder: (context, i) => InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () => playOrOpen(context, playlists[i].episode),
+            child: PlaylistCard(playlist: playlists[i], size: 150),
+          ),
+        ),
+      ),
+    ]);
   }
 }
 

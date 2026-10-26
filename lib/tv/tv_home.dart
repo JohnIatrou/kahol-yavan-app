@@ -7,6 +7,7 @@ import '../state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/news.dart';
+import '../widgets/playlists.dart';
 import 'tv_show_screen.dart';
 import 'tv_widgets.dart';
 
@@ -36,6 +37,7 @@ class TvHome extends StatelessWidget {
                     height: 240,
                     children: st.shows.map((sh) => _ShowCard(show: sh)).toList(),
                   ),
+                  const _Playlists(),
                   // Not focusable: the remote moves from the archive straight on to the next row, and the page scrolls past this one.
                   const Padding(
                     padding: EdgeInsets.fromLTRB(48, 0, 48, 24),
@@ -297,6 +299,30 @@ class _ShowCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The daily playlists, right under the archive.
+class _Playlists extends StatefulWidget {
+  const _Playlists();
+
+  @override
+  State<_Playlists> createState() => _PlaylistsState();
+}
+
+class _PlaylistsState extends State<_Playlists> with PlaylistsLoader {
+  @override
+  Widget build(BuildContext context) => TvRow(
+        title: 'פלייליסטים',
+        height: 196,
+        children: [
+          for (final p in playlists)
+            TvFocusable(
+              radius: 22 * 180 / 205,
+              onPressed: () => Scope.of(context).audio.playEpisode(p.episode),
+              child: PlaylistCard(playlist: p, size: 180),
+            ),
+        ],
+      );
 }
 
 class _LatestEpisodes extends StatefulWidget {
