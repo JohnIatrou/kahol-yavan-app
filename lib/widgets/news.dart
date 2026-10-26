@@ -8,6 +8,7 @@ import '../config.dart';
 import '../state.dart';
 import '../theme.dart';
 import 'common.dart';
+import 'plus.dart';
 
 /// Reloads a list of posts every few minutes while it is on screen.
 mixin _Feed<T extends StatefulWidget> on State<T> {
@@ -163,17 +164,9 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
                   child: Row(children: [
                     // The station's "כחול יוון +" logo opens the line.
                     Image.asset('assets/brand/kahol-yavan-logo.png', height: 38, filterQuality: FilterQuality.medium),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 32,
-                      height: 20,
-                      decoration: BoxDecoration(color: const Color(0xFFF4B740), borderRadius: BorderRadius.circular(10)),
-                      // The "+" drawn from two bars, like in the logo file.
-                      child: Stack(alignment: Alignment.center, children: [
-                        for (final (w, h) in const [(12.0, 4.0), (4.0, 12.0)])
-                          Container(width: w, height: h, decoration: BoxDecoration(color: Ly.night, borderRadius: BorderRadius.circular(1.5))),
-                      ]),
-                    ),
+                    const SizedBox(width: 4),
+                    // The "+" pops up like a bubble, with a golden glow and a flash of light, every 15 seconds.
+                    const PlusBadge(width: 32, every: Duration(seconds: 15)),
                     const SizedBox(width: 12),
                     label,
                     const SizedBox(width: 16),

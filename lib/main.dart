@@ -16,6 +16,7 @@ import 'theme.dart';
 import 'tv/tv_home.dart';
 import 'tv/tv_platform.dart';
 import 'widgets/common.dart';
+import 'widgets/plus.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -127,7 +128,11 @@ class _RadioAppState extends State<RadioApp> {
                   child: child!,
                 )
             : null,
-        home: widget.tv ? const TvHome() : MobileHome(key: _home),
+        // A new start opens on the logo for five seconds while the player and the data load behind it.
+        home: OpeningScreen(
+          name: widget.tv ? 'רדיו כחול יוון פלוס' : 'רדיו כחול יוון',
+          child: widget.tv ? const TvHome() : MobileHome(key: _home),
+        ),
         routes: {'/archive': (_) => const Scaffold(body: ArchiveScreen())},
       ),
     );
