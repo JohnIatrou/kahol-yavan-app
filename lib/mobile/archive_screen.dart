@@ -208,3 +208,83 @@ class EpisodeTile extends StatelessWidget {
     );
   }
 }
+
+/// The latest episodes as a strip on the live screen, under the player: "ארכיון תכניות", with a way into the whole archive.
+class ArchiveStrip extends StatefulWidget {
+  const ArchiveStrip({super.key, this.onAll});
+  final VoidCallback? onAll;
+
+  @override
+  State<ArchiveStrip> createState() => _ArchiveStripState();
+}
+
+class _ArchiveStripState extends State<ArchiveStrip> {
+  Future<EpisodePage>? _f;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _f ??= Scope.of(context).state.api.episodes();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<EpisodePage>(
+      future: _f,
+      builder: (context, snap) {
+        final eps = (snap.data?.episodes ?? const <Episode>[]).where((e) => e.playable).take(12).toList();
+        if (eps.isEmpty) return const SizedBox.shrink();
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 8),
+            child: Row(children: [
+              const Expanded(child: Text('ארכיון תכניות', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900))),
+              if (widget.onAll != null) TextButton(onPressed: widget.onAll, child: const Text('לכל הארכיון')),
+            ]),
+          ),
+          SizedBox(
+            height: 232,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: eps.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (context, i) => _ArchiveCard(episode: eps[i]),
+            ),
+          ),
+        ]);
+      },
+    );
+  }
+}
+
+class _ArchiveCard extends StatelessWidget {
+  const _ArchiveCard({required this.episode});
+  final Episode episode;
+
+  @override
+  Widget build(BuildContext context) {
+    final e = episode;
+    return SizedBox(
+      width: 150,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => Scope.of(context).audio.toggleEpisode(e),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Stack(alignment: Alignment.center, children: [
+            Artwork(url: e.picture, size: 150, radius: 14, seed: e.title),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.45), shape: BoxShape.circle),
+              child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 30),
+            ),
+          ]),
+          const SizedBox(height: 6),
+          Text(e.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+          Text(e.label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Ly.muted, fontSize: 11)),
+          if (e.summary.isNotEmpty) Text(e.summary, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, height: 1.25)),
+        ]),
+      ),
+    );
+  }
+}

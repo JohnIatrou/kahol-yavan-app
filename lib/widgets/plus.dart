@@ -206,7 +206,7 @@ class _OpeningScreenState extends State<OpeningScreen> with SingleTickerProvider
 
   Widget _screen(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
-    final logoW = (size.width * (size.width > size.height ? 0.44 : 0.62)).clamp(160.0, 560.0);
+    final logoW = (size.width * (size.width > size.height ? 0.3 : 0.62)).clamp(160.0, 420.0);
     return DecoratedBox(
       decoration: const BoxDecoration(
         gradient: RadialGradient(center: Alignment(0, -0.2), radius: 0.9, colors: [Color(0xFF173A7A), Ly.deep]),

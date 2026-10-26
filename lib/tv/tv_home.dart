@@ -35,13 +35,10 @@ class TvHome extends StatelessWidget {
                 children: [
                   const _Hero(),
                   const SizedBox(height: 20),
-                  TvRow(
-                    title: 'התכניות בארכיון',
-                    height: 240,
-                    children: st.shows.map((sh) => _ShowCard(show: sh)).toList(),
-                  ),
+                  // The latest episodes of all shows: the archive, newest first.
+                  const _LatestEpisodes(),
                   const _Playlists(),
-                  // Not focusable: the remote moves from the archive straight on to the next row, and the page scrolls past this one.
+                  // Not focusable: the remote moves from the playlists straight on to the next row, and the page scrolls past this one.
                   const Padding(
                     padding: EdgeInsets.fromLTRB(48, 0, 48, 24),
                     child: Row(children: [
@@ -50,7 +47,6 @@ class TvHome extends StatelessWidget {
                       _StudioQr(),
                     ]),
                   ),
-                  const _LatestEpisodes(),
                   TvRow(title: 'הכי מושמעים השבוע', height: 200, children: s.most.map(_song).toList()),
                   TvRow(title: 'שירים חדשים', height: 200, children: s.fresh.map(_song).toList()),
                   TvRow(title: 'לוח התכניות', height: 130, children: _fromToday(st.schedule).map((sh) => _ScheduleCard(show: sh)).toList()),
@@ -276,34 +272,6 @@ class _TvLiveButton extends StatelessWidget {
   }
 }
 
-class _ShowCard extends StatelessWidget {
-  const _ShowCard({required this.show});
-  final Show show;
-
-  @override
-  Widget build(BuildContext context) {
-    return TvFocusable(
-      onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => TvShowScreen(show: show))),
-      child: Container(
-        width: 160,
-        color: Ly.card,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Artwork(url: show.picture, size: 160, radius: 0, seed: show.name),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 8, 10, 0),
-            child: Text(show.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Text(show.when.isNotEmpty ? show.when : '${show.count} פרקים',
-                maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Ly.muted, fontSize: 12)),
-          ),
-        ]),
-      ),
-    );
-  }
-}
-
 /// The daily playlists, right under the archive.
 class _Playlists extends StatefulWidget {
   const _Playlists();
@@ -349,8 +317,8 @@ class _LatestEpisodesState extends State<_LatestEpisodes> {
     return FutureBuilder<EpisodePage>(
       future: _f,
       builder: (context, snap) => TvRow(
-        title: 'פרקים אחרונים',
-        height: 215,
+        title: 'ארכיון תכניות',
+        height: 232,
         children: (snap.data?.episodes ?? const []).where((e) => e.playable).map((e) => TvEpisodeCard(episode: e)).toList(),
       ),
     );

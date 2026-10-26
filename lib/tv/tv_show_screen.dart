@@ -116,7 +116,7 @@ class TvEpisodeCard extends StatelessWidget {
     final e = episode;
     return TvFocusable(
       autofocus: autofocus,
-      onPressed: () => Scope.of(context).audio.playEpisode(e),
+      onPressed: () => Scope.of(context).audio.toggleEpisode(e),
       child: Container(
         width: 240,
         color: Ly.card,
