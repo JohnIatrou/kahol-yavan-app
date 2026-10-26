@@ -109,9 +109,9 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
     final w = _weather.isEmpty ? null : _weather[_w % _weather.length];
     String two(int n) => n.toString().padLeft(2, '0');
     final day = _now.weekday % 7;
-    // TV: the short date ("יום א 25.10.26") leaves the headline more room.
+    // TV: the short date ("יום א 25.10") leaves the headline more room.
     final date = big
-        ? 'יום ${_dayLetters[day]} ${two(_now.day)}.${two(_now.month)}.${two(_now.year % 100)}'
+        ? 'יום ${_dayLetters[day]} ${two(_now.day)}.${two(_now.month)}'
         : 'יום ${kDayNames[day]} ${two(_now.day)}.${two(_now.month)}.${_now.year}';
     final clock = '$date · ${two(_now.hour)}:${two(_now.minute)}';
     final label = Container(
@@ -132,7 +132,7 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
     );
     final info = <Widget>[
       Text(clock, style: TextStyle(fontSize: fs, color: Ly.sky, fontWeight: FontWeight.w700, fontFeatures: const [FontFeature.tabularFigures()])),
-      if (w != null) Padding(padding: EdgeInsets.symmetric(horizontal: big ? 12 : 8), child: Text('|', style: TextStyle(fontSize: fs, color: Ly.line))),
+      if (w != null) Padding(padding: EdgeInsets.symmetric(horizontal: big ? 6 : 8), child: Text('|', style: TextStyle(fontSize: fs, color: Ly.line))),
       // The weather in Israel's main cities, one city at a time.
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
@@ -141,9 +141,9 @@ class _NewsTickerState extends State<NewsTicker> with _Feed {
             ? const SizedBox.shrink()
             : Row(key: ValueKey(w.city), mainAxisSize: MainAxisSize.min, children: [
                 Text(w.city, style: TextStyle(fontSize: fs, fontWeight: FontWeight.w700)),
-                SizedBox(width: big ? 8 : 6),
-                WeatherIcon(code: w.code, day: w.day, size: fs * 2.2),
-                SizedBox(width: big ? 6 : 4),
+                SizedBox(width: big ? 2 : 6),
+                WeatherIcon(code: w.code, day: w.day, size: fs * (big ? 2 : 2.2)),
+                SizedBox(width: big ? 1 : 4),
                 Text('\u200E${w.temp}°',
                     style: TextStyle(fontSize: fs, color: Ly.sky, fontWeight: FontWeight.w800, fontFeatures: const [FontFeature.tabularFigures()])),
               ]),
