@@ -317,6 +317,41 @@ class Episode {
   String get picture => host.isNotEmpty ? host : image;
 }
 
+/// A daily playlist from the station's Drive folder ("שעה שקטה", "הטופ 20"…), one per style, replaced each morning.
+class Playlist {
+  final String key;
+  final String title;
+  final String audio;
+  final DateTime? updated;
+  final double duration;
+  final List<String> tracks;
+
+  const Playlist({required this.key, required this.title, required this.audio, this.updated, this.duration = 0, this.tracks = const []});
+
+  factory Playlist.fromJson(Map<String, dynamic> j) => Playlist(
+        key: _s(j['key']),
+        title: _s(j['title']),
+        audio: _s(j['audio']),
+        updated: DateTime.tryParse(_s(j['updated']))?.toLocal(),
+        duration: _d(j['duration']),
+        tracks: (j['tracks'] as List?)?.map(_s).where((t) => t.isNotEmpty).toList() ?? const [],
+      );
+
+  /// Played like an archive episode.
+  Episode get episode => Episode(
+        id: 900000 + key.hashCode.abs() % 100000,
+        title: title,
+        label: 'פלייליסט · רדיו כחול יוון',
+        audio: audio,
+        duration: duration,
+        mixcloud: const [],
+        image: '',
+        host: '',
+        show: 0,
+        link: '',
+      );
+}
+
 class EpisodePage {
   final List<Episode> episodes;
   final int page;
@@ -474,6 +509,9 @@ class Api {
   }
 
   /// The magazine (category 4). Sites without /lym/v1/app/magazine yet are read through /wp/v2/posts.
+  Future<List<Playlist>> playlists() async =>
+      _list((await _get('/lym/v1/app/playlists') as Map)['playlists']).map(Playlist.fromJson).where((p) => p.audio.isNotEmpty).toList();
+
   Future<PostPage> magazine({int page = 1}) async {
     try {
       final j = await _get('/lym/v1/app/magazine', {'page': '$page'}) as Map;

@@ -12,7 +12,7 @@ for v in phone tv; do
   [ "$v" = tv ] && extra=(--dart-define=FORCE_TV=true)
   rm -rf "$out/$v"
   "$flutter" build web --release --no-web-resources-cdn --base-href "/kahol-yavan-preview/$v/" \
-    --dart-define=BASE_URL=https://leylotyavan.co.il "${extra[@]}" -o "$out/$v"
+    --dart-define=BASE_URL=https://leylotyavan.co.il --dart-define=DEMO_PLAYLISTS=true "${extra[@]}" -o "$out/$v"
   # Only CanvasKit is used; the other renderers and debug symbols are 20 MB nobody downloads.
   rm -rf "$out/$v"/canvaskit/{skwasm*,wimp*,webparagraph,*.symbols} "$out/$v"/canvaskit/chromium/*.symbols
   sed -i 's|<title>[^<]*</title>|<title>רדיו כחול יוון</title>|; s|flutter_bootstrap.js"|flutter_bootstrap.js?v='"$stamp"'"|' "$out/$v/index.html"
