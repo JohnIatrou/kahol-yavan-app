@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 
 import '../api.dart';
 import '../theme.dart';
@@ -48,7 +49,7 @@ class _TvShowScreenState extends State<TvShowScreen> {
     return Scaffold(
       body: Column(children: [
         Expanded(
-          child: CustomScrollView(slivers: [
+          child: CustomScrollView(scrollCacheExtent: const ScrollCacheExtent.pixels(10000), slivers: [
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(48, 36, 48, 24),
               sliver: SliverToBoxAdapter(

@@ -1,5 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 
 import '../theme.dart';
 import '../widgets/common.dart';
@@ -118,6 +119,7 @@ class _TvRowState extends State<TvRow> {
             child: FocusTraversalGroup(
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
+                scrollCacheExtent: const ScrollCacheExtent.pixels(4000),
                 clipBehavior: Clip.none,
                 padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 8),
                 itemCount: children.length,
