@@ -36,14 +36,26 @@ class RadioHandler extends BaseAudioHandler with SeekHandler {
 
   void setConfig(AppConfig c) => _config = c;
 
-  Future<void> playLive({Song? now, String program = ''}) async {
+  Future<void> playLive({Song? now, String program = ''}) {
     _episode = null;
-    mediaItem.add(_liveItem(now, program));
+    return _start(_liveItem(now, program), _config.stream);
+  }
+
+  // Bumped on every switch, so a slow load of an earlier choice can't start playing over the newer one.
+  int _switch = 0;
+
+  /// Stops whatever plays now (live or an episode) and starts [url] in its place.
+  Future<void> _start(MediaItem item, String url) async {
+    final mine = ++_switch;
+    mediaItem.add(item);
     try {
-      await _player.setUrl(_config.stream);
-      await _player.play();
+      await _player.stop();
+      if (mine != _switch) return;
+      await _player.setUrl(url);
+      if (mine != _switch) return;
+      _player.play();
     } catch (_) {
-      _broadcast(error: true);
+      if (mine == _switch) _broadcast(error: true);
     }
   }
 
@@ -52,15 +64,17 @@ class RadioHandler extends BaseAudioHandler with SeekHandler {
     if (isLive) mediaItem.add(_liveItem(now, program));
   }
 
-  Future<void> playEpisode(Episode e) async {
+  Future<void> playEpisode(Episode e) {
     _episode = e;
-    mediaItem.add(_episodeItem(e));
-    try {
-      await _player.setUrl(e.audio);
-      await _player.play();
-    } catch (_) {
-      _broadcast(error: true);
+    return _start(_episodeItem(e), e.audio);
+  }
+
+  /// A second press on the episode already loaded pauses or resumes it instead of starting it over.
+  Future<void> toggleEpisode(Episode e) {
+    if (!isLive && _episode?.id == e.id && _player.processingState != ProcessingState.idle) {
+      return _player.playing ? pause() : play();
     }
+    return playEpisode(e);
   }
 
   MediaItem _episodeItem(Episode e) => MediaItem(

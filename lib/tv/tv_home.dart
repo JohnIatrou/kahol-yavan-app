@@ -318,7 +318,7 @@ class _PlaylistsState extends State<_Playlists> with PlaylistsLoader {
           for (final p in playlists)
             TvFocusable(
               radius: 22 * 180 / 205,
-              onPressed: () => Scope.of(context).audio.playEpisode(p.episode),
+              onPressed: () => Scope.of(context).audio.toggleEpisode(p.episode),
               child: PlaylistCard(playlist: p, size: 180),
             ),
         ],
