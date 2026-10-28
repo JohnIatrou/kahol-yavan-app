@@ -71,6 +71,7 @@ void main() {
     await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 200)));
     await tester.pumpAndSettle();
     expect(state.audio.episode?.id, episodes[1].id);
+    await tester.runAsync(state.audio.stop);
     state.dispose();
   });
 

@@ -103,7 +103,12 @@ class MiniPlayer extends StatelessWidget {
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
                         Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
-                        Text(item.artist ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Ly.muted, fontSize: 12)),
+                        ValueListenableBuilder<bool>(
+                          valueListenable: audio.reconnecting,
+                          builder: (context, retrying, _) => retrying
+                              ? const Text('אין חיבור, מנסה להתחבר…', maxLines: 1, style: TextStyle(color: Ly.cream, fontSize: 12))
+                              : Text(item.artist ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Ly.muted, fontSize: 12)),
+                        ),
                       ]),
                     ),
                     IconButton(

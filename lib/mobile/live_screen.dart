@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../config.dart';
-import '../state.dart';
+import '../schedule.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/playlists.dart';
@@ -42,7 +42,7 @@ class LiveScreen extends StatelessWidget {
                 ),
               if (s.fresh.isNotEmpty)
                 Panel(title: 'שירים חדשים בפלייליסט', mark: Ly.wa, child: Column(children: s.fresh.take(10).map((x) => SongTile(song: x)).toList())),
-              if (st.schedule.isNotEmpty) const SchedulePanel(),
+              const SchedulePanel(),
               if (st.config.platforms.isNotEmpty)
                 Panel(
                   title: 'האזנה גם ב…',
@@ -88,6 +88,8 @@ class LivePlayerCard extends StatelessWidget {
     final s = st.studio;
     final now = s.now;
     final c = st.config;
+    final clock = DateTime.now();
+    final next = nextSlot(clock);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -159,7 +161,8 @@ class LivePlayerCard extends StatelessWidget {
         ]),
         const Divider(color: Ly.line, height: 28),
         const Center(child: LivePlayButton(size: 84)),
-        if (s.nextName.isNotEmpty) ...[
+        const ConnectionNotice(),
+        if (next != null) ...[
           const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.all(14),
@@ -167,8 +170,9 @@ class LivePlayerCard extends StatelessWidget {
             child: Row(children: [
               const Pill('התכנית הבאה', color: Color(0xFFFFE3A3)),
               const SizedBox(width: 10),
-              Expanded(child: Text(s.nextName, style: const TextStyle(color: Ly.night, fontWeight: FontWeight.w800))),
-              Text(s.nextStart, style: const TextStyle(color: Ly.night)),
+              Expanded(child: Text(next.$1.name, style: const TextStyle(color: Ly.night, fontWeight: FontWeight.w800))),
+              const SizedBox(width: 8),
+              Text(whenLabel(next.$2, clock), style: const TextStyle(color: Ly.night)),
             ]),
           ),
         ],
@@ -237,41 +241,42 @@ class SchedulePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Rebuild on every board refresh: a const widget is not rebuilt by its parent.
+    // Rebuild on every board refresh, so "now" and "today" follow the clock.
     final st = Scope.of(context).state;
     return ListenableBuilder(listenable: st, builder: (context, _) => _build(context));
   }
 
   Widget _build(BuildContext context) {
-    final st = Scope.of(context).state;
-    final today = DateTime.now().weekday % 7;
+    final now = DateTime.now();
+    final today = now.weekday % 7;
+    final onAir = currentSlot(now);
     return Panel(
       title: 'לוח התכניות',
       mark: Ly.aegean,
       child: Column(
-        children: st.schedule.map((show) {
-          final isToday = show.day == today;
+        children: kSchedule.map((slot) {
+          final live = identical(slot, onAir);
+          final isToday = slot.days.contains(today);
           return Container(
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: isToday ? Ly.sky.withValues(alpha: 0.12) : Ly.card,
-              border: isToday ? Border.all(color: Ly.sky.withValues(alpha: 0.5)) : null,
+              color: live ? Ly.sky.withValues(alpha: 0.2) : isToday ? Ly.sky.withValues(alpha: 0.08) : Ly.card,
+              border: live ? Border.all(color: Ly.sky) : isToday ? Border.all(color: Ly.sky.withValues(alpha: 0.4)) : null,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(children: [
               SizedBox(
-                width: 64,
+                width: 78,
                 child: Column(children: [
-                  Text(isToday ? 'היום' : 'יום ${kDayNames[show.day!]}', style: const TextStyle(color: Ly.muted, fontSize: 12)),
-                  Text(show.start, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
+                  Text(slot.daysLabel, style: TextStyle(color: isToday ? Ly.sky : Ly.muted, fontSize: 12, fontWeight: FontWeight.w700)),
+                  Text(slot.start, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
+                  Text('עד ${slot.end}', style: const TextStyle(color: Ly.muted, fontSize: 11)),
                 ]),
               ),
-              const SizedBox(width: 8),
-              Artwork(url: show.picture, size: 44, radius: 22, seed: show.name),
               const SizedBox(width: 10),
-              Expanded(child: Text(show.name, style: const TextStyle(fontWeight: FontWeight.w700))),
-              if (show.end.isNotEmpty) Text('עד ${show.end}', style: const TextStyle(color: Ly.muted, fontSize: 12)),
+              Expanded(child: Text(slot.name, style: const TextStyle(fontWeight: FontWeight.w700, height: 1.25))),
+              if (live) const Padding(padding: EdgeInsetsDirectional.only(start: 8), child: Pill('עכשיו')),
             ]),
           );
         }).toList(),

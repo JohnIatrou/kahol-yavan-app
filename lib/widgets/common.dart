@@ -340,3 +340,27 @@ String fmtDuration(Duration d) {
 }
 
 String fmtDate(DateTime? d) => d == null ? '' : '${d.day}.${d.month}.${d.year}';
+
+/// Shown while the player has lost the connection and keeps retrying.
+class ConnectionNotice extends StatelessWidget {
+  const ConnectionNotice({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: Scope.of(context).audio.reconnecting,
+      builder: (context, retrying, _) => !retrying
+          ? const SizedBox.shrink()
+          : Container(
+              margin: const EdgeInsets.only(top: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(color: Ly.cream.withValues(alpha: 0.12), border: Border.all(color: Ly.cream), borderRadius: BorderRadius.circular(14)),
+              child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Ly.cream)),
+                SizedBox(width: 10),
+                Flexible(child: Text('אין חיבור, מנסה להתחבר…', style: TextStyle(color: Ly.cream, fontWeight: FontWeight.w700))),
+              ]),
+            ),
+    );
+  }
+}
