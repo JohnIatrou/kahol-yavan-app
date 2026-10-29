@@ -73,6 +73,14 @@ jobs:
           flutter build appbundle --release --build-number=$BUILD_NUMBER --dart-define=BUILD_NUMBER=$BUILD_NUMBER
           flutter build apk --release --build-number=$BUILD_NUMBER --dart-define=BUILD_NUMBER=$BUILD_NUMBER
 
+      - name: Check the notification resources in the APK
+        run: |
+          AAPT2=$(ls -d $ANDROID_HOME/build-tools/*/ | tail -1)aapt2
+          $AAPT2 dump resources build/app/outputs/flutter-apk/app-release.apk > res.txt
+          grep -n -i "ic_notification\|audio_service_\|tv_banner" res.txt | head -40 || true
+          echo "--- total drawables:"; grep -c "resource .*drawable/" res.txt || true
+          $AAPT2 dump xmltree --file AndroidManifest.xml build/app/outputs/flutter-apk/app-release.apk | grep -n -i -A3 "service\|ic_notification\|targetSdk" | head -60
+
       - uses: actions/upload-artifact@v4
         with:
           name: kahol-yavan-${{ env.BUILD_NUMBER }}
