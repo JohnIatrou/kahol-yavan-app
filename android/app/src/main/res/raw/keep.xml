@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The player notification looks its icons up by name (from Dart), which the release build's resource shrinking
+     can't see. Without them Android 13+ refuses the notification's buttons, the player never becomes a foreground
+     service, and the phone stops the audio a few seconds after the app leaves the screen. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/audio_service_*,@drawable/ic_notification" />

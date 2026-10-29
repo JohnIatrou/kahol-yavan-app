@@ -73,6 +73,15 @@ jobs:
           flutter build appbundle --release --build-number=$BUILD_NUMBER --dart-define=BUILD_NUMBER=$BUILD_NUMBER
           flutter build apk --release --build-number=$BUILD_NUMBER --dart-define=BUILD_NUMBER=$BUILD_NUMBER
 
+      # The player notification finds its icons by name; if the build strips them, background playback breaks.
+      - name: Check the player notification icons are in the APK
+        run: |
+          AAPT2=$(ls -d $ANDROID_HOME/build-tools/*/ | tail -1)aapt2
+          res=$($AAPT2 dump resources build/app/outputs/flutter-apk/app-release.apk)
+          for icon in ic_notification audio_service_pause audio_service_play_arrow audio_service_stop audio_service_fast_forward audio_service_fast_rewind; do
+            echo "$res" | grep -q "drawable/$icon\b" || { echo "::error::drawable/$icon is missing from the APK"; exit 1; }
+          done
+
       - uses: actions/upload-artifact@v4
         with:
           name: kahol-yavan-${{ env.BUILD_NUMBER }}
